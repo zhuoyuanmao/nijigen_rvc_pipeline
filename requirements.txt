@@ -1,0 +1,51 @@
+###############################################################################
+# Reference list of the project's top-level Python deps.
+#
+# DO NOT `pip install -r requirements.txt` directly! The actual install
+# is performed by `setup.sh` in a very specific order to satisfy the
+# triangular constraint between RVC (numba 0.56.4 / numpy 1.23.5 /
+# fairseq 0.12.2 / torch<2.2), Demucs (torch>=2.0), and audio-separator
+# (torch>=2.0 + onnxruntime-gpu). Reordering or letting pip auto-resolve
+# breaks one of the three.
+#
+# This file exists so dependabot / repo scanners see the dependencies,
+# and so a human can audit at a glance what's pulled in.
+###############################################################################
+
+# --- pytorch (installed by setup.sh from cu121 wheel index) ---
+# torch==2.1.2
+# torchaudio==2.1.2
+
+# --- RVC pinned stack ---
+numpy==1.23.5
+numba==0.56.4
+llvmlite==0.39.0
+librosa==0.9.1
+fairseq==0.12.2
+faiss-cpu==1.7.3
+pyworld==0.3.2
+torchcrepe==0.0.20
+praat-parselmouth>=0.4.2
+
+# --- Stage 1: source separation ---
+demucs==4.0.1
+
+# --- Stage 2: UVR-MDX vocal cleanup ---
+audio-separator[gpu]>=0.24.0
+# onnxruntime-gpu pulled transitively by audio-separator[gpu]
+
+# --- Stages 1/2/4 audio I/O ---
+soundfile>=0.12.1
+ffmpeg-python>=0.2.0
+scipy<1.13
+resampy>=0.4.2
+
+# --- RVC training/runtime helpers ---
+tensorboardX
+tensorboard
+tqdm>=4.63.1
+python-dotenv>=1.0.0
+pydub>=0.25.1
+Cython
+joblib>=1.1.0
+scikit-learn

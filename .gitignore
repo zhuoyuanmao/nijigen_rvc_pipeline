@@ -1,0 +1,28 @@
+# This repo is methodology md + reference code ONLY.
+# Never commit audio, models, or large binaries.
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.ogg
+*.mp4
+*.pth
+*.index
+*.onnx
+*.ckpt
+*.npy
+*.zip
+*.tar
+*.tar.gz
+
+# data / model / output dirs
+data/
+models/
+models_v2/
+output/
+logs/
+dataset_raw/
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
