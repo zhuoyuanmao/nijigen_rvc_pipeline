@@ -237,7 +237,7 @@ python _rebuild_v4.py --cache-name stage3_cache_flat \
 > 决定成败的是"分离后残留污染量", 不是"是否分离"; 分得好的 stem = 干声。
 > 唯一分离器根治不了的是**同时段同类多人声重叠** (对唱齐唱同一句)。
 
-对原始男声干声 (`Desktop/AI翻唱/夏日.wav`, 44.1k float32 mono, 160s **真人干声录音**,
+对原始男声干声 (the raw source vocal, 44.1k float32 mono, 160s **真人干声录音**,
 即 source_40k 的母带) 跑了完整 v4 链 (`_prep_source_v4.py`: anvuew dereverb
 → 3×Roformer min-|x|, 80s on 3090)。逐段对比:
 
@@ -324,7 +324,7 @@ v1 当时靠某种手动方式补过但没进文档, 是隐藏坑。
 
 ### 10.3 v4.5 语料重制 (`_prep_corpus_v45.py`)
 
-从 26 个原始 raw 轨 (`Desktop/AI翻唱/data_raw/{otoya,sho}_raw`) 重做:
+从 26 个原始 raw 轨 (`raw/{otoya,sho}_raw`) 重做:
 ```
 ffmpeg 44.1k → 3×Roformer 直接分离 (弃 demucs: 其 torchaudio 在 venv 里坏了)
   → 门控混合: 响帧 min-|x| (去伴奏) / 静帧 median (保呼吸) sigmoid gate

@@ -21,7 +21,7 @@
 ## 1. 端到端流水线
 
 ```
-raw 整曲 (Desktop/AI翻唱/data_raw/<voice>_raw/*.wav)
+raw 整曲 (raw/<voice>_raw/*.wav)
    │  [A] v4.5 语料重制 (_prep_corpus_v45.py)
    ▼
 data/<voice>_v45_corpus/  (每曲一个干净人声文件)
@@ -184,28 +184,22 @@ LPF+tame 修复链、逐段选 ckpt。如果 v2 仍出伪影, **先怀疑训练�
 
 ---
 
-## 9. 各音色进度 (character-specific 详见各 KNOWHOW)
+## 9. 参考实现 (case studies)
 
-本项目 = **6 音色 (3 男 + 3 女)**, 各带 solo + 男声齐唱 / 女声齐唱。
+仓库里的两个 case study 演示了本方法论的完整落地:
 
-| 音色 | 性别 | 状态 | KNOWHOW |
+| 音色 | 特点 | 看点 | KNOWHOW |
 |---|---|---|---|
-| otoya_sho_mix | 男 (otoya:sho 2:1) | ✅ v2 完成, 成品 e140 单模型 | [link](characters/otoya_sho_mix/KNOWHOW.md) |
-| honoka | 女 | v1 成品在; v2 计划中 (§10) | [link](characters/honoka/KNOWHOW.md) |
-| (待建 ×4) | 2男 + 2女 | 用本文档配方从头训 | — |
+| **otoya_sho_mix** | 男声, otoya:sho 2:1 文件级混合 | 最完整的 v2 参考; §10 = 训练侧根治电流声 | [link](characters/otoya_sho_mix/KNOWHOW.md) |
+| **honoka** | 亮嗓女高音 | character-specific 修复参数 + 中值谱 ensemble + 呼吸修复 | [link](characters/honoka/KNOWHOW.md) |
 
-> `liyuu` **不计入这 6 音色** — 是更早的独立项目 (中文歌翻唱, 含唐可可混合),
-> 仅作 legacy 方法论源头保留 ([link](characters/liyuu/KNOWHOW.md))。
-
-后 4 个音色: 直接用本文档配方从头训, 跳过 v1 的推理侧挣扎。
+具体某首歌的音色进度 (如東京サマーセッション 的 6 音色) 见仓库 README。
 
 ---
 
 ## 10. 文档体系
 
-- **本文档 (METHODOLOGY.md)**: character-agnostic, 单一真相源。
-- **characters/<name>/KNOWHOW.md**: character-specific 增量。
-- **legacy (不用于当前 agent)**: `AGENT_LESSONS.md`、`README.md` (描述已死的 v1
-  通用管线)、各 `data/*RUN_ME*.md` / `data/*PIPELINE*.md`、
-  `latest_feedback/GPU_VOCAL_PREP_v4.md` (v4 原始方案, 已被 v4.5 取代) —
-  均为早期 (DeepSeek agent 时代) 产物, 保留备查, 当前流程以本文档为准。
+- **METHODOLOGY.md (本文档)**: character-agnostic + song-agnostic, 单一真相源 —
+  训任意音色都照它。
+- **characters/<name>/KNOWHOW.md**: 各音色特有的增量与实战案例。
+- **README.md**: 项目入口 + 具体歌曲项目的进度 (東京サマーセッション …)。

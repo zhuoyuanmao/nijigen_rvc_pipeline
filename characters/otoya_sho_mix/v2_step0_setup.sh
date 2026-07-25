@@ -7,11 +7,13 @@
 #   * everything heavy stays on ext4 (826G free); C: is at 91% and only
 #     receives the small *_infer.pth files at deploy time.
 set -e
-RVC=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/Retrieval-based-Voice-Conversion-WebUI
-PYTHON=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/.venv/bin/python
-CHAR=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/characters/otoya_sho_mix
+# Paths derived from this script's location; override PYTHON/RVC_DATA_DIR via env.
+CHAR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT="$(cd "$CHAR/../.." && pwd)"
+RVC="${RVC_DIR:-$PROJECT/Retrieval-based-Voice-Conversion-WebUI}"
+PYTHON="${PYTHON:-$PROJECT/.venv/bin/python}"
 EXP=otoya_sho_mix_v2
-EXTHOME=/home/kevin/rvc_data/$EXP
+EXTHOME="${RVC_DATA_DIR:-$HOME/rvc_data}/$EXP"   # ext4 training dir (fast I/O)
 
 echo "=== $EXP Step 0: Setup ==="
 

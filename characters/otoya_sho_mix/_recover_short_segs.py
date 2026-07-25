@@ -39,7 +39,7 @@ import soundfile as sf
 import librosa
 import torch
 
-PROJECT = Path("/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore")
+PROJECT = Path(__file__).resolve().parents[2]  # repo/project root
 RVC_DIR = PROJECT / "Retrieval-based-Voice-Conversion-WebUI"
 CHAR = PROJECT / "characters/otoya_sho_mix"
 BASE = CHAR / "output" / CLI.song

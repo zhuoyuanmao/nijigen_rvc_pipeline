@@ -16,8 +16,9 @@
 # Run detached so it survives this shell:
 #   setsid bash v2_step4_train.sh > logs/train_v2.log 2>&1 &
 set -e
-RVC=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/Retrieval-based-Voice-Conversion-WebUI
-PYTHON=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/.venv/bin/python
+PROJECT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+RVC="${RVC_DIR:-$PROJECT/Retrieval-based-Voice-Conversion-WebUI}"
+PYTHON="${PYTHON:-$PROJECT/.venv/bin/python}"
 EXP=otoya_sho_mix_v2
 cd "$RVC"
 

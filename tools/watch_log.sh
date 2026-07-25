@@ -9,7 +9,7 @@
 #   bash tools/watch_log.sh /tmp/prep_corpus.log  # follow any log
 #   bash tools/watch_log.sh <file> once           # print tail and exit
 set -u
-LOG="${1:-/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/characters/otoya_sho_mix/logs/train_v2.log}"
+LOG="${1:?usage: watch_log.sh <logfile> [once]}"
 MODE="${2:-follow}"
 
 clean() { tr -d '\r' | grep -a -v -e 'it/s]' -e 'it]' -e '^ *$'; }

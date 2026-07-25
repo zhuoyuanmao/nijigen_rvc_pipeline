@@ -1,7 +1,7 @@
 """v4 preprocessing for the tokyo_summer male dry stem (inference source).
 
 The current v3 inference source (stage1_40k/source_40k.wav) is a plain
-40k-mono conversion of Desktop/AI翻唱/夏日.wav — it never went through the
+40k-mono conversion of the raw source vocal — it never went through the
 v4 cleanup chain that the honoka source got. This applies the same chain,
 starting from the original 44.1k file for maximum headroom:
 
@@ -12,8 +12,8 @@ starting from the original 44.1k file for maximum headroom:
       -> peak-safety only, then a 40k-mono copy for RVC
 
     python _prep_source_v4.py \
-        --input "/mnt/c/Users/kevin/Desktop/AI翻唱/夏日.wav" \
-        --outdir output/tokyo_summer_v4src
+        --input path/to/source_vocal.wav \
+        --outdir output/<song>_v4src
 """
 from __future__ import annotations
 

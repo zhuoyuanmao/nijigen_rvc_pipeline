@@ -3,9 +3,10 @@
 # Training is launched separately so the pretrain load can be confirmed
 # before committing 20h of GPU.
 set -e
-CHAR=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/characters/otoya_sho_mix
-RVC=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/Retrieval-based-Voice-Conversion-WebUI
-PYTHON=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/.venv/bin/python
+CHAR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT="$(cd "$CHAR/../.." && pwd)"
+RVC="${RVC_DIR:-$PROJECT/Retrieval-based-Voice-Conversion-WebUI}"
+PYTHON="${PYTHON:-$PROJECT/.venv/bin/python}"
 EXP=otoya_sho_mix_v2
 
 echo "########## STEP 0: setup ##########"

@@ -4,7 +4,8 @@
 > 本文档只记 honoka 特有的内容 (亮嗓女高音参数、呼吸修复、v2 择优方案 §十)。
 >
 > 日期: 2026-07-19 | 模型: RVC v2 | 角色: Honoka Kousaka (穂乃果) | GPU: RTX 3090 24GB
-> 参考: [Liyuu KNOWHOW](../liyuu/KNOWHOW.md) — 大量方法论来自 Liyuu 项目实战
+> 注: §3-4 的推理侧方法 (V3 ensemble / P 链 / 分轨混音) 承袭更早的项目实战,
+> 属 v1 时代经验; v2 的结论 (§九、§十 + [METHODOLOGY](../../METHODOLOGY.md)) 已大幅简化这些。
 >
 > ✅ **2026-07-25 推理侧优化完成** — 见 §九。最佳成品:
 > `output/tokyo_summer_v3/stage5_rebuilt/vocals_rebuilt_flat_medens.wav`

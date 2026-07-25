@@ -12,9 +12,11 @@ import time
 import faiss
 import numpy as np
 
-EXT4_FEATS = Path.home() / "rvc_data/honoka_v1/logs/3_feature768"
-OUT = Path("/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/characters/"
-           "honoka/models/flat_full_src_feat.index")
+import os
+PROJECT = Path(__file__).resolve().parents[2]
+EXT4_FEATS = Path(os.environ.get("RVC_DATA_DIR", Path.home() / "rvc_data")) / \
+    "honoka_v1/logs/3_feature768"
+OUT = PROJECT / "characters/honoka/models/flat_full_src_feat.index"
 
 t0 = time.time()
 files = sorted(EXT4_FEATS.glob("*.npy"))

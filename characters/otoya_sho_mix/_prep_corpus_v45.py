@@ -7,7 +7,7 @@ Why (all measured, see KNOWHOW §8):
     inference source, harmful for TRAINING data where breaths are genuine
     voice samples.
 
-Chain per raw track (Desktop/AI翻唱/data_raw/{otoya,sho}_raw/*.wav):
+Chain per raw track (raw/{otoya,sho}_raw/*.wav):
   ffmpeg 44.1k stereo
     -> 3x Roformer vocals models applied DIRECTLY to the mix
        (they are full-mix separators, higher SDR than htdemucs; this also
@@ -27,6 +27,7 @@ file level instead of one giant concat (no cross-song slices).
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import time
@@ -41,9 +42,12 @@ from _prep_source_v4 import (separator_pass, VOCALS_MODELS,
                              DEREVERB_MODEL, DEREVERB_STEM)
 
 CHAR = Path(__file__).resolve().parent
+# Raw full-mix song downloads, one dir per voice. Point RAW_DIR at wherever
+# yours live (default: <project>/raw/<voice>_raw).
+RAW_DIR = Path(os.environ.get("RAW_DIR", Path(__file__).resolve().parents[2] / "raw"))
 RAW = {
-    "otoya": Path("/mnt/c/Users/kevin/Desktop/AI翻唱/data_raw/otoya_raw"),
-    "sho":   Path("/mnt/c/Users/kevin/Desktop/AI翻唱/data_raw/sho_raw"),
+    "otoya": RAW_DIR / "otoya_raw",
+    "sho":   RAW_DIR / "sho_raw",
 }
 OUT = CHAR / "data/v45_corpus"
 WORK = CHAR / "data/v45_work"

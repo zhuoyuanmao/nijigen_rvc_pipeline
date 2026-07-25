@@ -6,11 +6,12 @@
 # G only for conversion). Here the heavy originals stay on ext4; only the
 # small *_infer.pth (~140MB each) land in models_v2/ on C:.
 set -e
-CHAR=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/characters/otoya_sho_mix
-E=/home/kevin/rvc_data/otoya_sho_mix_v2/logs
+CHAR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT="$(cd "$CHAR/../.." && pwd)"
+E="${RVC_DATA_DIR:-$HOME/rvc_data}/otoya_sho_mix_v2/logs"
 CFG=$E/config.json
 DST=$CHAR/models_v2
-PYTHON=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/.venv/bin/python
+PYTHON="${PYTHON:-$PROJECT/.venv/bin/python}"
 MIN_STEP=2540   # epoch 20
 
 mkdir -p "$DST"

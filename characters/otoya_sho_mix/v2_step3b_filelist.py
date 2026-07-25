@@ -16,7 +16,10 @@ import argparse
 import os
 from random import shuffle
 
-RVC = "/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/Retrieval-based-Voice-Conversion-WebUI"
+# project root = two levels up from this script (characters/<name>/ -> root)
+_PROJECT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+RVC = os.environ.get("RVC_DIR",
+                     os.path.join(_PROJECT, "Retrieval-based-Voice-Conversion-WebUI"))
 
 
 def main() -> int:
