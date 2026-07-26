@@ -207,6 +207,10 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 - **成品归集 (约定)**: 各版本混音前的最终人声统一拷到 `characters/<name>/output/final/`,
   命名 `FINAL_<name>_v<N>.wav` (整曲)。stage5/stage8 等中间产物留原处;
   `output/final/` 只放"可交付/可混 BGM"的整曲成品, 一眼可取。
+- **小样本锁配方 → 整曲渲染 (工作流)**: 配方 (ckpt 窗口 / 底模 / 呼吸 / 口味) 可在
+  单句~数十秒**小样本**上耳测定稿, 再对**全曲源**照配方整曲渲染。若全曲干声源为**后录**
+  (如女声全曲), 先把小样本放进 `output/final/` 命名 `*.PLACEHOLDER-<Ns>.wav` 占位,
+  录源后照配方重跑, 用整曲 `FINAL_<name>_v<N>.wav` 替换占位。
 
 ---
 
@@ -239,7 +243,7 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 | 音色 | 性别 | 状态 | KNOWHOW |
 |---|---|---|---|
 | otoya_sho_mix | 男 (otoya:sho 2:1) | ✅ v2 完成, 成品 baseline 中值谱 ensemble (`FINAL_otoya_v2.wav`) | [link](characters/otoya_sho_mix/KNOWHOW.md) |
-| honoka | 女 | ✅ v2 配方定稿 (TITAN 中值谱 + 呼吸静音, §11.4, 25s A/B 耳测过); ⏳ **整曲渲染待做** | [link](characters/honoka/KNOWHOW.md) |
+| honoka | 女 | ✅ v2 配方定稿 (TITAN 中值谱 + 呼吸静音, 素/无 warm, §11.4, 25s 小样本耳测过); ⏳ **整曲待录女声全曲源** | [link](characters/honoka/KNOWHOW.md) |
 | kotori | 女 | 🔄 v2 TITAN 训练中 (200ep), 走与 honoka 相同收尾链 | (训练完成后补) |
 | (待建 ×3) | 2男 + 1女 | 用本文档配方从头训 | — |
 

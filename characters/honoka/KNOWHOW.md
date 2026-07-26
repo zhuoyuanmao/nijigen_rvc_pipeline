@@ -8,8 +8,9 @@
 >
 > ✅ **2026-07-25 推理侧优化完成** — 见 §九。
 > ✅ **2026-07-26 v2 训练侧重做 + TITAN A/B + 成品配方定案** — 见 §十一。
-> 配方: TITAN 中值谱 ensemble + 呼吸静音 (§11.4)。
-> ⏳ `output/final/FINAL_honoka_v2.wav` 目前仅 25s A/B 片段, **整曲渲染待做**。
+> 配方: TITAN 中值谱 ensemble + 呼吸静音, **素/无 warm** (§11.4)。
+> ⏳ 全流程在 25s 小样本上锁配方; `output/final/FINAL_honoka_v2.PLACEHOLDER-25s.wav` 是占位。
+> **整曲渲染待"女声全曲干声源"录制后**照配方重跑 (非 GPU 阻塞)。
 > 方法论背景见 [otoya_sho_mix/KNOWHOW.md](../otoya_sho_mix/KNOWHOW.md) §6-7、§10。
 
 ---
@@ -219,7 +220,7 @@ config 列表 = `[n_mel_channels, segment_size, inter_channels, hidden_channels,
 - [x] 中值谱 ensemble (6×e100-200 ckpt, §11.3)
 - [x] P 链后处理 + 呼吸静音 (§11.4)
 - [x] 成品**配方**定案 (TITAN 中值 + 呼吸静音, §11.4, 用户 2026-07-26 定)
-- [ ] 整曲 v2 渲染 (当前 `output/final/FINAL_honoka_v2.wav` 仅 25s A/B 片段)
+- [ ] 整曲 v2 渲染 (待录女声全曲源; 当前 final/ 是 `*.PLACEHOLDER-25s.wav` 占位)
 
 ---
 
@@ -536,21 +537,30 @@ TITAN 内部有取舍: e182 最亮 (air −26.5, 音色 46), e121 音色最优 (
 > 但**亮嗓女高音是例外**——单 ckpt 会暴露谐波间噪声, **中值谱 ensemble 才是真最优**。
 > 已写入 [METHODOLOGY §7](../../METHODOLOGY.md)。
 
-### 11.4 成品配方 (用户 2026-07-26 定案) + ⏳ 整曲渲染待做
+### 11.4 成品配方 (用户 2026-07-26 定案) + ⏳ 整曲待录女声全曲源
 
 **配方** = **TITAN 中值谱 ensemble + 呼吸静音** (`_AB.../8m_titan_MEDIAN_breath-muted.wav`)。
 - 底模: TITAN (亮嗓空气感略胜 baseline)
 - 重建: 6 个 e100-200 ckpt 的中值谱 ensemble (无和声噪音, 无梳齿)
 - 呼吸: 全静音 (用户口味; 裸干声上句尾呼吸偏突出, 混 BGM 后本会被盖)
+- **染色: 素版, 无 warm** —— A/B 里有 warm 变体 (`8w`, 低-中 +2dB 低搁架), 用户选的是
+  `8m` (素/plain), **warm 未入选**。故标准配方**不含 warm**; warm 仍是 §7 可选口味, 非默认。
 
-> ⚠️ **当前 `output/final/FINAL_honoka_v2.wav` 仅为 25s A/B 验收片段** (§9.3 的 24.6s 段),
-> **整曲 v2 渲染尚未做** —— honoka v3 全流程只在这 25s 上调过参/耳测; 整曲需按此配方
-> 对完整源重跑推理 (分段 → TITAN e100-200 各 ckpt → 中值谱 → 呼吸静音 → 拼接)。
+> ⚠️ **工作流: 小样本锁配方 → 录全曲源 → 整曲渲染**。honoka v3 全流程在 25s 小样本
+> (§9.3 的 24.6s 段) 上定 ckpt/底模/呼吸/口味; **女声全曲干声源为后录**, 故
+> `output/final/FINAL_honoka_v2.PLACEHOLDER-25s.wav` 是占位, 整曲成品待录源后照配方重跑
+> (分段 → TITAN e100-200 各 ckpt → 中值谱 → 呼吸静音 → 拼接), 替换为 `FINAL_honoka_v2.wav`。
 > (`tokyo_summer/`、`tokyo_summer_v2/` 里的 227s 全曲是 DeepSeek 时代 v1 产物, 非此配方。)
 
 试听全集 (供复核): `output/tokyo_summer_v3/_AB_v2_baseline_vs_titan/`
-0=v1冠军 1=单ckpt(有和声噪音) 2/3=单ckpt亮/音色 4/5/6=呼吸-8/-18/静音
-7(w)=baseline中值(暖) 8(w/m)=titan中值(暖/静音) 9=源。
+```
+0 v1_champion            4 TITAN_e182_breath-8db    8  titan_MEDIAN
+1 v2_baseline_e202       5 TITAN_e182_breath-18db   8m titan_MEDIAN_breath-muted ← 选定
+2 v2_TITAN_e182_brightest 6 TITAN_e182_breath-muted  8w titan_MEDIAN_warm (未选)
+3 v2_TITAN_e121_besttimbre 7 baseline_MEDIAN         9  SOURCE_ref
+                          7w baseline_MEDIAN_warm
+```
+> `m`=呼吸静音, `w`=warm(低-中+2dB 低搁架)。定选 = `8m` (titan 中值 + 呼吸静音, **素/无 warm**)。
 
 ### 11.5 待用户耳测 (原始 A/B 记录, 已被 §11.4 取代)
 
