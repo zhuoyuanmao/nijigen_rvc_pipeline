@@ -1,14 +1,14 @@
 # Honoka RVC 翻唱流水线 — 实战指南
 
 > 📖 **跨音色统一流程/配方见 [../../METHODOLOGY.md](../../METHODOLOGY.md)。**
-> 本文档只记 honoka 特有的内容 (亮嗓女高音参数、呼吸修复、v2 择优方案 §十)。
+> 本文档只记 honoka 特有的内容 (亮嗓女高音参数、呼吸修复、v2 训练+成品定案 §十一)。
 >
 > 日期: 2026-07-19 | 模型: RVC v2 | 角色: Honoka Kousaka (穂乃果) | GPU: RTX 3090 24GB
 > 参考: [Liyuu KNOWHOW](../liyuu/KNOWHOW.md) — 大量方法论来自 Liyuu 项目实战
 >
 > ✅ **2026-07-25 推理侧优化完成** — 见 §九。
-> 🔥 **2026-07-26 v2 训练侧重做 + TITAN A/B 完成** — 见 §十一。待用户耳测:
-> `output/tokyo_summer_v3/_AB_v2_baseline_vs_titan/`。
+> ✅ **2026-07-26 v2 训练侧重做 + TITAN A/B + 成品定案完成** — 见 §十一。
+> 成品: `stage5_rebuilt/FINAL_honoka_v2.wav` (TITAN 中值谱 ensemble + 呼吸静音, §11.4)。
 > 方法论背景见 [otoya_sho_mix/KNOWHOW.md](../otoya_sho_mix/KNOWHOW.md) §6-7、§10。
 
 ---
@@ -208,14 +208,16 @@ config 列表 = `[n_mel_channels, segment_size, inter_channels, hidden_channels,
 
 ## 六、当前状态
 
-- [x] 训练 (2026-07-18, 160 epochs, ~4h52m)
-- [x] FAISS 索引 (IVF256,Flat, 31MB)
-- [x] ckpt 部署到 models/ (e70-e160, 10对, 需转换→推理格式)
-- [ ] 推理: 东京夏日相会 (进行中)
-- [ ] V3 ensemble
-- [ ] P 链后处理
-- [ ] M 链混音
-- [ ] 主观评价
+> 全流程已完成并定案；详情见 §九 (推理侧) 与 §十一 (v2 训练侧 + 成品)。
+> 下面 v1 勾选表为历史记录，v2 收尾以 §11.4 为准。
+
+- [x] v1 训练 (2026-07-18, 160 epochs, ~4h52m)
+- [x] v2 训练侧重做 + TITAN A/B (2026-07-26, 200ep/se20, §十一)
+- [x] flat 全量索引 (537,174 向量, 仅入选切片)
+- [x] 推理: 东京夏日相会 (tokyo_summer_v3)
+- [x] 中值谱 ensemble (6×e100-200 ckpt, §11.3)
+- [x] P 链后处理 + 呼吸静音 (§11.4)
+- [x] 成品定案: `FINAL_honoka_v2.wav` (TITAN 中值 + 呼吸静音, 用户 2026-07-26 定)
 
 ---
 
@@ -548,7 +550,7 @@ TITAN 内部有取舍: e182 最亮 (air −26.5, 音色 46), e121 音色最优 (
 
 底模 A/B 结论仍成立 (TITAN 略亮), 但成品形态从"单 ckpt"改为"中值谱 ensemble"。
 
-### 11.4 产物与脚本
+### 11.6 产物与脚本
 
 ```
 models_v2/        baseline 10 ckpt infer + flat 索引 (537,174 向量, 仅入选切片)

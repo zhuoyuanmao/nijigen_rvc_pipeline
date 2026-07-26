@@ -50,8 +50,9 @@ ja_tts_explore/
 | 音色 | 性别 | 状态 |
 |---|---|---|
 | **otoya_sho_mix** | 男 (音也:翔 2:1) | ✅ v2 完成，成品 e140 单模型 |
-| **honoka** | 女 | v1 成品在；v2 择优方案见其 KNOWHOW §十 |
-| (待建 ×4) | 2 男 + 2 女 | 用 METHODOLOGY 配方从头训 |
+| **honoka** | 女 | ✅ v2 完成，成品 TITAN 中值谱 ensemble + 呼吸静音 (`FINAL_honoka_v2.wav`)，详见 KNOWHOW §11.4 |
+| **kotori** | 女 | 🔄 v2 TITAN 训练中 (200ep)，完成后走与 honoka 相同的收尾链 |
+| (待建 ×3) | 2 男 + 1 女 | 用 METHODOLOGY 配方从头训 |
 
 > `liyuu` **不属于**这 6 音色 —— 是更早的独立项目（中文歌翻唱，含唐可可混合），
 > 保留为方法论源头（见其 KNOWHOW 的失败尝试表），不计入本项目进度。
