@@ -1,4 +1,4 @@
-# ja_tts_explore — 动漫角色 RVC 翻唱生产线
+# nijigen_rvc_pipeline — 动漫角色 RVC 翻唱生产线
 
 用 RVC v2 声音转换，把一首日语歌翻唱成**动漫角色音色**的成品。
 当前项目：《東京サマーセッション》（男女对唱）的 **6 音色翻唱**
@@ -26,7 +26,7 @@
 ## 目录结构
 
 ```
-ja_tts_explore/
+nijigen_rvc_pipeline/
 ├── METHODOLOGY.md          ⭐ 跨音色统一方法论 (character-agnostic)
 ├── characters/<name>/      每个音色一个自包含目录
 │   ├── KNOWHOW.md          该音色特有的实战记录 (character-specific)
