@@ -72,6 +72,27 @@ nijigen_rvc_pipeline/
 
 ---
 
+## 参考与致谢 (Acknowledgments)
+
+本仓库是在开源 **RVC (Retrieval-based Voice Conversion)** 之上的**方法论与生产实践**；
+声音转换引擎本身来自上游开源项目，特此致谢：
+
+- **Retrieval-based-Voice-Conversion-WebUI** (RVC-Project, MIT) —— 核心训练 / 推理引擎。
+  <https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI>
+  目录树中的 `Retrieval-based-Voice-Conversion-WebUI/` 即其源码（第三方，**不随本仓库分发**）。
+
+底模与关键子模型（同样不随本仓库分发，请按各自许可自行获取）：
+
+- **TITAN** 社区底模 (blaise-tk) —— 亮嗓女高音起训底模，见 METHODOLOGY §6/§7 与 `tools/download_titan_pretrain.sh`。
+  <https://huggingface.co/blaise-tk/TITAN>（镜像 <https://huggingface.co/Politrees/RVC_resources>）
+- **ContentVec**（768-dim 内容特征）、**RMVPE**（F0 提取）—— RVC v2 默认组件。
+- 人声分离 / 去混响（v4.5 语料重制）：**BS-RoFormer / Mel-RoFormer** 系列 + **anvuew** dereverb。
+
+> 本仓库仅含**方法论文档 + 参考脚本**（MIT，见 [LICENSE](LICENSE)），
+> 不包含也不分发上述任何模型权重或第三方源码。
+
+---
+
 ## 历史文档 (legacy, 备查)
 
 以下为早期 (DeepSeek agent 时代) 产物，当前流程**不以它们为准**：
