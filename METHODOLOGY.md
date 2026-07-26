@@ -244,7 +244,7 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 |---|---|---|---|
 | otoya_sho_mix | 男 (otoya:sho 2:1) | ✅ v2 完成, 成品 baseline 中值谱 ensemble (`FINAL_otoya_v2.wav`) | [link](characters/otoya_sho_mix/KNOWHOW.md) |
 | honoka | 女 | ✅ v2 配方定稿 (TITAN 中值谱 + 呼吸静音, 素/无 warm, §11.4, 25s 小样本耳测过); ⏳ **整曲待录女声全曲源** | [link](characters/honoka/KNOWHOW.md) |
-| kotori | 女 | 🔄 v2 TITAN 训练中 (200ep), 走与 honoka 相同收尾链 | (训练完成后补) |
+| kotori | 女 | ✅ v2 配方定稿 (TITAN 中值谱 + 呼吸静音, e100-180, 25s); ⏳ 整曲待录女声全曲源 | [link](characters/kotori/KNOWHOW.md) |
 | (待建 ×3) | 2男 + 1女 | 用本文档配方从头训 | — |
 
 > `liyuu` **不计入这 6 音色** — 是更早的独立项目 (中文歌翻唱, 含唐可可混合),

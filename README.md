@@ -51,7 +51,7 @@ nijigen_rvc_pipeline/
 |---|---|---|
 | **otoya_sho_mix** | 男 (音也:翔 2:1) | ✅ v2 完成，成品 baseline 中值谱 ensemble（`FINAL_otoya_v2.wav`） |
 | **honoka** | 女 | ✅ v2 配方定稿（TITAN 中值谱 + 呼吸静音，素/无 warm，25s 小样本耳测过）；⏳ 整曲待录女声全曲源后渲染（final/ 现为占位） |
-| **kotori** | 女 | 🔄 v2 TITAN 训练中 (200ep)，完成后走与 honoka 相同的收尾链 |
+| **kotori** | 女 | ✅ v2 配方定稿（TITAN 中值谱 + 呼吸静音，e100–180，25s 小样本）；⏳ 整曲待录女声全曲源 |
 | (待建 ×3) | 2 男 + 1 女 | 用 METHODOLOGY 配方从头训 |
 
 > `liyuu` **不属于**这 6 音色 —— 是更早的独立中文翻唱项目（含唐可可混合），
