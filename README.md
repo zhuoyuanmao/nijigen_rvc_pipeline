@@ -49,8 +49,8 @@ nijigen_rvc_pipeline/
 
 | 音色 | 性别 | 状态 |
 |---|---|---|
-| **otoya_sho_mix** | 男 (音也:翔 2:1) | ✅ v2 完成，成品 e140 单模型 |
-| **honoka** | 女 | ✅ v2 完成，成品 TITAN 中值谱 ensemble + 呼吸静音 (`FINAL_honoka_v2.wav`)，详见 KNOWHOW §11.4 |
+| **otoya_sho_mix** | 男 (音也:翔 2:1) | ✅ v2 完成，成品 baseline 中值谱 ensemble（`FINAL_otoya_v2.wav`） |
+| **honoka** | 女 | ✅ v2 配方定稿（TITAN 中值谱 + 呼吸静音，25s A/B 已耳测通过，KNOWHOW §11.4）；⏳ 整曲渲染待做 |
 | **kotori** | 女 | 🔄 v2 TITAN 训练中 (200ep)，完成后走与 honoka 相同的收尾链 |
 | (待建 ×3) | 2 男 + 1 女 | 用 METHODOLOGY 配方从头训 |
 
@@ -67,8 +67,11 @@ nijigen_rvc_pipeline/
 2. **v4.5 语料重制**：3×Roformer 分离 + 门控混合（响帧去伴奏 / 静帧保呼吸）
    + 去混响。弃 demucs、弃 concat 大文件（切片保留曲目身份）。
 3. **flat 全量索引**：旧 IVF256+nprobe=1 检索形同关闭。
-4. **推理侧极简**：训对后不需要 ensemble/中值谱/transpose/修复链——那些是
-   欠训模型的补救。出伪影先怀疑训练没跑对。
+4. **推理侧极简**：训对后不需要波形平均 ensemble/transpose/修复链——那些是
+   欠训模型的补救。**唯一保留的推理技巧是中值谱 ensemble**（零成本去谐波间噪声，
+   男女声统一默认，otoya 2026-07-26 耳测确认），单 ckpt 为简版备选。
+5. **男女声唯一差异 = 底模**：男/暗嗓用官方 f0G40k，亮嗓/女高音用 TITAN；
+   其余（语料、训练、中值谱重建、去噪、呼吸）完全相同。
 
 ---
 

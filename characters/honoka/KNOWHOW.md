@@ -7,8 +7,9 @@
 > 参考: Liyuu 项目 — 大量方法论来自更早的 Liyuu 翻唱项目实战 (不在本仓库)
 >
 > ✅ **2026-07-25 推理侧优化完成** — 见 §九。
-> ✅ **2026-07-26 v2 训练侧重做 + TITAN A/B + 成品定案完成** — 见 §十一。
-> 成品: `stage5_rebuilt/FINAL_honoka_v2.wav` (TITAN 中值谱 ensemble + 呼吸静音, §11.4)。
+> ✅ **2026-07-26 v2 训练侧重做 + TITAN A/B + 成品配方定案** — 见 §十一。
+> 配方: TITAN 中值谱 ensemble + 呼吸静音 (§11.4)。
+> ⏳ `output/final/FINAL_honoka_v2.wav` 目前仅 25s A/B 片段, **整曲渲染待做**。
 > 方法论背景见 [otoya_sho_mix/KNOWHOW.md](../otoya_sho_mix/KNOWHOW.md) §6-7、§10。
 
 ---
@@ -217,7 +218,8 @@ config 列表 = `[n_mel_channels, segment_size, inter_channels, hidden_channels,
 - [x] 推理: 东京夏日相会 (tokyo_summer_v3)
 - [x] 中值谱 ensemble (6×e100-200 ckpt, §11.3)
 - [x] P 链后处理 + 呼吸静音 (§11.4)
-- [x] 成品定案: `FINAL_honoka_v2.wav` (TITAN 中值 + 呼吸静音, 用户 2026-07-26 定)
+- [x] 成品**配方**定案 (TITAN 中值 + 呼吸静音, §11.4, 用户 2026-07-26 定)
+- [ ] 整曲 v2 渲染 (当前 `output/final/FINAL_honoka_v2.wav` 仅 25s A/B 片段)
 
 ---
 
@@ -534,13 +536,17 @@ TITAN 内部有取舍: e182 最亮 (air −26.5, 音色 46), e121 音色最优 (
 > 但**亮嗓女高音是例外**——单 ckpt 会暴露谐波间噪声, **中值谱 ensemble 才是真最优**。
 > 已写入 [METHODOLOGY §7](../../METHODOLOGY.md)。
 
-### 11.4 最终成品 (用户 2026-07-26 定案)
+### 11.4 成品配方 (用户 2026-07-26 定案) + ⏳ 整曲渲染待做
 
-**`stage5_rebuilt/FINAL_honoka_v2.wav`** = **TITAN 中值谱 ensemble + 呼吸静音**
-(`_AB.../8m_titan_MEDIAN_breath-muted.wav`)。
+**配方** = **TITAN 中值谱 ensemble + 呼吸静音** (`_AB.../8m_titan_MEDIAN_breath-muted.wav`)。
 - 底模: TITAN (亮嗓空气感略胜 baseline)
 - 重建: 6 个 e100-200 ckpt 的中值谱 ensemble (无和声噪音, 无梳齿)
 - 呼吸: 全静音 (用户口味; 裸干声上句尾呼吸偏突出, 混 BGM 后本会被盖)
+
+> ⚠️ **当前 `output/final/FINAL_honoka_v2.wav` 仅为 25s A/B 验收片段** (§9.3 的 24.6s 段),
+> **整曲 v2 渲染尚未做** —— honoka v3 全流程只在这 25s 上调过参/耳测; 整曲需按此配方
+> 对完整源重跑推理 (分段 → TITAN e100-200 各 ckpt → 中值谱 → 呼吸静音 → 拼接)。
+> (`tokyo_summer/`、`tokyo_summer_v2/` 里的 227s 全曲是 DeepSeek 时代 v1 产物, 非此配方。)
 
 试听全集 (供复核): `output/tokyo_summer_v3/_AB_v2_baseline_vs_titan/`
 0=v1冠军 1=单ckpt(有和声噪音) 2/3=单ckpt亮/音色 4/5/6=呼吸-8/-18/静音

@@ -13,8 +13,10 @@
 
 **把力气花在训练侧, 推理侧就能极简。**
 训练做对 (加载 pretrain + 干净语料), 模型收敛后各 epoch 高度等价 →
-推理侧塌缩为"挑一个中段 ckpt, 完事"。ensemble / 中值谱 / transpose / 修复链
-这些技巧本质是**欠训模型的补救**, 训对了就不需要。
+推理侧塌缩为一条确定性链: **中段 ckpt 的中值谱 ensemble (去谐波间噪声) + 可选呼吸处理, 完事**。
+真正的"欠训补救" (波形平均 ensemble / transpose 升八度 / LPF+修复链) 训对了就不需要;
+但**中值谱 ensemble 不是补救**, 是零 GPU 成本的去噪 (从已有 ckpt 输出直接算), 男女声都用
+(otoya 男声 2026-07-26 耳测确认, 见 §7)。
 
 ---
 
@@ -36,9 +38,9 @@ data/<voice>_v45_corpus/  (每曲一个干净人声文件)
    ▼
    │  [G] 部署转 infer 格式 + flat 索引
    ▼
-   │  [H] 推理: 单中段 ckpt 重建 (_build_single_ckpt.py)
+   │  [H] 推理: 中段 ckpt 中值谱 ensemble 重建 (+ 可选呼吸处理)
    ▼
-成品人声 → (混 BGM = 最终翻唱)
+成品人声 (归集到 characters/<name>/output/final/) → (混 BGM = 最终翻唱)
 ```
 
 ---
@@ -142,6 +144,22 @@ python train.py -se 20 -te 200 -bs 16 -sr 40k -f0 1 -l 0 -sw 0 \
 > - **otoya 男声**: 音色**反而略差** (39.5→41.0), 无空气感缺陷 → TITAN 用不上。
 >
 > **规则**: 亮嗓/女高音 → TITAN; 男声/暗嗓 → 官方 f0G40k。见 honoka §11 / otoya A/B。
+> 这是男女声流程的**唯一差异**; 其余 (语料、训练、中值谱重建、去噪、呼吸) 完全相同。
+
+### 6.1 男声 vs 女声 方法论 (换音色只换底模)
+
+| 环节 | 男声 / 暗嗓 | 女声 / 亮嗓 |
+|---|---|---|
+| 语料重制 (§3) | v4.5 | v4.5 (相同) |
+| 训练配方 (§6) | `-se20 -te200 -bs16 -sr40k -f0 1` | 相同 |
+| **底模 `-pg/-pd`** | **官方 f0G40k / f0D40k** | **TITAN G/D** |
+| 重建 (§7) | 中值谱 ensemble | 中值谱 ensemble (相同) |
+| 去噪音 (§7) | = 中值谱 + 源侧分离 | 相同 |
+| 呼吸处理 (§7) | 标准步, 按源决定 | 标准步, 按源决定 (相同) |
+
+> **换音色只改一处: `-pg/-pd` 指向 f0G40k (男) 还是 TITAN (女)。其余完全一致。**
+> 成品实例: otoya (男) = f0G40k + 中值谱 (`FINAL_otoya_v2.wav`);
+> honoka (女) = TITAN + 中值谱 + 呼吸静音 (`FINAL_honoka_v2.wav`)。
 
 - **detached 运行**: `setsid bash v2_step4_train.sh > logs/train_v2.log 2>&1 &`
   (训练不依赖终端/会话存活)。
@@ -159,30 +177,36 @@ python train.py -se 20 -te 200 -bs 16 -sr 40k -f0 1 -l 0 -sw 0 \
 1. **部署** (`v2_step6_deploy.sh`): 15 个 ckpt 转 infer 格式, **只拷 _infer 到 C:**。
 2. **flat 全量索引** (`_build_flat_index_v2.py`): 精确检索全部特征向量。
    > 旧 IVF256 + nprobe=1 + 10k 聚类中心 = 检索形同关闭 (音色距离差 1.9-3.1)。
-3. **重建**: 两条路, 依音色而定 ——
-   a. **单中段 ckpt** (`_build_single_ckpt.py`): e100-200 打分选一个整曲用。简单;
-      对 otoya (混合男声) 与逐段选优/ensemble 客观持平。
-   b. **中值谱 ensemble** (`honoka/_median_ensemble.py` 或从 stage8 逐 ckpt 输出直接
-      取 top-k 幅度谱**逐 bin 中值** + 最佳 ckpt 相位): 对**亮嗓/高频丰富**音色是**真最优**。
+3. **重建 = 中值谱 ensemble (男女声统一默认)**: 从 stage8 逐 ckpt 输出直接取 e100-200
+   窗口各 ckpt 幅度谱**逐 bin 中值** + 中间 ckpt 相位 (`honoka/_median_ensemble.py` /
+   `_median_from_stage8.py`)。**零 GPU 成本** (从已有 ckpt 输出算)。
+   - **为什么是它**: 各 ckpt 的谐波间噪声落在不同 bin → 中值剔除 (honoka 亮嗓上
+     300-4k 谱平坦度 0.021→0.015, 近源); 谐波一致 → 保留体量; **不叠加梳齿**
+     (peaks 仍 0, 不像 v1 波形平均取梳齿并集)。听感 = "背后那层和声/沙噪"消失。
+   - **单中段 ckpt** (`_build_single_ckpt.py`) 是**够用的简版**: e100-200 打分选一个整曲用,
+     省掉中值那步; 客观上常与中值谱在噪声内。作为备选/快速验证保留。
 
-   > ⚠️ **单 ckpt 的例外 (honoka 实测, 2026-07-26)**: 单 ckpt 会**裸露该 ckpt 的
-   > 谐波间噪声** (300-4k 谱平坦度 0.021 vs 源 0.012), 听感是"背后一层和声/沙噪"。
-   > **中值谱 ensemble 同时解决**: 各 ckpt 谐波间噪声落在不同 bin → 中值剔除
-   > (降到 0.015, 近源); 谐波一致 → 保留体量; 且**不叠加梳齿** (peaks 仍 0,
-   > 不像 v1 波形平均那样把梳齿取并集)。otoya 因音色不同没暴露此点, honoka 亮嗓放大了它。
-   > **规则**: 亮嗓/女高音默认用中值谱 ensemble; 单 ckpt 是"够用的简版"。
-   > **实测边界 (2026-07-26)**: otoya 男声上中值谱**不比单 ckpt 好** (谐波间噪声
-   > 0.057 vs 单 ckpt 0.054, 略高), 因为男声本无 honoka 那种谐波间噪声问题。
-   > 所以: **亮嗓 → 中值; 男声/暗嗓 → 单 ckpt**。与"底模选择"同一条分界线。
+   > **男声也用中值谱 (otoya 耳测定论, 2026-07-26)**: 早前客观测量一度显示 otoya 男声上
+   > 中值 vs 单 ckpt 在噪声内 (谐波间 0.057 中值 vs 0.054 单, 略高), 故曾定"男声用单 ckpt"。
+   > 但用户 3 路 A/B 耳测 (`0` 单e140 / `1` baseline中值 / `2` TITAN中值) **选定
+   > `1` baseline 中值谱** —— 中值那层平滑/去噪在听感上胜出, 客观差异属噪声级。
+   > **结论: 中值谱 ensemble 是男女声统一默认; 单 ckpt 仅作简版备选。**
+   > 男女声的分界线**只在底模** (§6: 男 f0G40k / 女 TITAN), **不在重建方式**。
 
 **训对后不再需要的旧补救**: 波形平均 ensemble (叠加梳齿)、transpose 升八度、
-LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先查训练 (§2); 若出
-**谐波间和声噪音**, 用中值谱 ensemble。
+LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先查训练 (§2)。
 
-**可选的成品口味层** (混音级, 非缺陷修复):
-- **呼吸**: `_fix_breaths.py` (塞回源真呼吸, 修 RMVPE 呼吸段啸叫) / `_remove_breaths.py`
-  (−8/−18dB/静音, 嫌呼吸吵时用)。**绝不在前处理去呼吸** (会让 RVC 幻觉啸叫)。
-- **暖厚**: 低-中 (<600Hz) +2dB 低搁架, 追 v1 那种"实"的染色 (非保真)。
+**成品处理 (男女声通用)**:
+- **去噪音 = 没有独立降噪器**。谐波间"和声/沙噪"由**中值谱 ensemble** 去 (§7.3, 默认就做);
+  背景/混响噪声在**源侧**解决 (§3 语料 v4.5 分离 + §4 推理源 Roformer 分离 + dereverb)。
+  训对的模型 + 中值谱 = 成品已干净, **不要再挂降噪器** (它反而伤谐波)。男声同此。
+- **呼吸 (标准步, 按源决定, 男女通用)**: `_fix_breaths.py` (塞回源真呼吸, 修 RMVPE 呼吸段
+  啸叫) / `_remove_breaths.py` (−8/−18dB/静音, 嫌句尾呼吸吵时用, 如 honoka 成品)。
+  **绝不在前处理去呼吸** (会让 RVC 幻觉啸叫)。otoya 定稿未静音呼吸 (源无碍); honoka 静音。
+- **暖厚 (可选口味)**: 低-中 (<600Hz) +2dB 低搁架, 追 v1 那种"实"的染色 (非保真)。
+- **成品归集 (约定)**: 各版本混音前的最终人声统一拷到 `characters/<name>/output/final/`,
+  命名 `FINAL_<name>_v<N>.wav` (整曲)。stage5/stage8 等中间产物留原处;
+  `output/final/` 只放"可交付/可混 BGM"的整曲成品, 一眼可取。
 
 ---
 
@@ -214,8 +238,8 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 
 | 音色 | 性别 | 状态 | KNOWHOW |
 |---|---|---|---|
-| otoya_sho_mix | 男 (otoya:sho 2:1) | ✅ v2 完成, 成品 e140 单模型 | [link](characters/otoya_sho_mix/KNOWHOW.md) |
-| honoka | 女 | ✅ v2 完成, 成品 TITAN 中值谱 ensemble + 呼吸静音 (§11.4) | [link](characters/honoka/KNOWHOW.md) |
+| otoya_sho_mix | 男 (otoya:sho 2:1) | ✅ v2 完成, 成品 baseline 中值谱 ensemble (`FINAL_otoya_v2.wav`) | [link](characters/otoya_sho_mix/KNOWHOW.md) |
+| honoka | 女 | ✅ v2 配方定稿 (TITAN 中值谱 + 呼吸静音, §11.4, 25s A/B 耳测过); ⏳ **整曲渲染待做** | [link](characters/honoka/KNOWHOW.md) |
 | kotori | 女 | 🔄 v2 TITAN 训练中 (200ep), 走与 honoka 相同收尾链 | (训练完成后补) |
 | (待建 ×3) | 2男 + 1女 | 用本文档配方从头训 | — |
 
