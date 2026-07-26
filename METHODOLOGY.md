@@ -215,11 +215,12 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 | 音色 | 性别 | 状态 | KNOWHOW |
 |---|---|---|---|
 | otoya_sho_mix | 男 (otoya:sho 2:1) | ✅ v2 完成, 成品 e140 单模型 | [link](characters/otoya_sho_mix/KNOWHOW.md) |
-| honoka | 女 | v1 成品在; v2 计划中 (§10) | [link](characters/honoka/KNOWHOW.md) |
-| (待建 ×4) | 2男 + 2女 | 用本文档配方从头训 | — |
+| honoka | 女 | ✅ v2 完成, 成品 TITAN 中值谱 ensemble + 呼吸静音 (§11.4) | [link](characters/honoka/KNOWHOW.md) |
+| kotori | 女 | 🔄 v2 TITAN 训练中 (200ep), 走与 honoka 相同收尾链 | (训练完成后补) |
+| (待建 ×3) | 2男 + 1女 | 用本文档配方从头训 | — |
 
 > `liyuu` **不计入这 6 音色** — 是更早的独立项目 (中文歌翻唱, 含唐可可混合),
-> 仅作 legacy 方法论源头保留 ([link](characters/liyuu/KNOWHOW.md))。
+> 本仓库不含它, 仅作本方法论的部分经验源头被提及。
 
 后 4 个音色: 直接用本文档配方从头训, 跳过 v1 的推理侧挣扎。
 
@@ -229,7 +230,3 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 
 - **本文档 (METHODOLOGY.md)**: character-agnostic, 单一真相源。
 - **characters/<name>/KNOWHOW.md**: character-specific 增量。
-- **legacy (不用于当前 agent)**: `AGENT_LESSONS.md`、`README.md` (描述已死的 v1
-  通用管线)、各 `data/*RUN_ME*.md` / `data/*PIPELINE*.md`、
-  `latest_feedback/GPU_VOCAL_PREP_v4.md` (v4 原始方案, 已被 v4.5 取代) —
-  均为早期 (DeepSeek agent 时代) 产物, 保留备查, 当前流程以本文档为准。

@@ -54,8 +54,8 @@ nijigen_rvc_pipeline/
 | **kotori** | 女 | 🔄 v2 TITAN 训练中 (200ep)，完成后走与 honoka 相同的收尾链 |
 | (待建 ×3) | 2 男 + 1 女 | 用 METHODOLOGY 配方从头训 |
 
-> `liyuu` **不属于**这 6 音色 —— 是更早的独立项目（中文歌翻唱，含唐可可混合），
-> 保留为方法论源头（见其 KNOWHOW 的失败尝试表），不计入本项目进度。
+> `liyuu` **不属于**这 6 音色 —— 是更早的独立中文翻唱项目（含唐可可混合），
+> 本仓库不含它，只是本方法论的部分经验源头，故各处会提及 Liyuu 项目。
 
 ---
 
@@ -90,15 +90,3 @@ nijigen_rvc_pipeline/
 
 > 本仓库仅含**方法论文档 + 参考脚本**（MIT，见 [LICENSE](LICENSE)），
 > 不包含也不分发上述任何模型权重或第三方源码。
-
----
-
-## 历史文档 (legacy, 备查)
-
-以下为早期 (DeepSeek agent 时代) 产物，当前流程**不以它们为准**：
-`AGENT_LESSONS.md`、`steps/` + `codes/pipeline.py`（已冻结的 v1 通用管线）、
-各 `characters/*/data/*RUN_ME*.md`、`latest_feedback/GPU_VOCAL_PREP_v4.md`
-（v4 原始方案，已被 v4.5 取代）。
-
-> 注：本仓库当前不是 git 仓库；机器间传递靠打包 zip（见 `tools/zip_for_gpu.sh`），
-> 不是 README 早期版本描述的双机 git 工作流。
