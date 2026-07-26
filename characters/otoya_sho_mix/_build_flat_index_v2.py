@@ -12,11 +12,8 @@ import time
 import faiss
 import numpy as np
 
-import os
-PROJECT = Path(__file__).resolve().parents[2]
-FEATS = Path(os.environ.get("RVC_DATA_DIR", Path.home() / "rvc_data")) / \
-    "otoya_sho_mix_v2/logs/3_feature768"
-OUT = PROJECT / "characters/otoya_sho_mix/models_v2/flat_full_src_feat.index"
+FEATS = Path.home() / "rvc_data/otoya_sho_mix_v2/logs/3_feature768"
+OUT = Path(__file__).resolve().parents[2] / "characters/otoya_sho_mix/models_v2/flat_full_src_feat.index"
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
 t0 = time.time()

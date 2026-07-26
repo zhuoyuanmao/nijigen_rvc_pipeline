@@ -36,7 +36,7 @@ import soundfile as sf
 import librosa
 import torch
 
-PROJECT = Path(__file__).resolve().parents[2]  # repo/project root
+PROJECT = Path(__file__).resolve().parents[2]
 RVC_DIR = PROJECT / "Retrieval-based-Voice-Conversion-WebUI"
 CHAR = PROJECT / "characters/otoya_sho_mix"
 MODELS_DIR = CHAR / "models"

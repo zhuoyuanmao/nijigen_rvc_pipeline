@@ -12,8 +12,8 @@ starting from the original 44.1k file for maximum headroom:
       -> peak-safety only, then a 40k-mono copy for RVC
 
     python _prep_source_v4.py \
-        --input path/to/source_vocal.wav \
-        --outdir output/<song>_v4src
+        --input "the raw source vocal" \
+        --outdir output/tokyo_summer_v4src
 """
 from __future__ import annotations
 

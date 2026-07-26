@@ -1,19 +1,18 @@
 #!/bin/bash
-# otoya_sho_mix_v2: setup + slice + F0 + ContentVec features, in one go.
-# Training is launched separately so the pretrain load can be confirmed
-# before committing 20h of GPU.
+# honoka_v2: setup + slice + F0 + features + score/select + filelist.
+# Training launched separately (pretrain-load confirmation gate).
 set -e
 PROJECT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-CHAR=$PROJECT/characters/otoya_sho_mix
+CHAR=$PROJECT/characters/honoka
 RVC=$PROJECT/Retrieval-based-Voice-Conversion-WebUI
 PYTHON=$PROJECT/.venv/bin/python
-EXP=otoya_sho_mix_v2
+EXP=honoka_v2
+TARGET_MIN="${TARGET_MIN:-180}"
 
 echo "########## STEP 0: setup ##########"
 bash "$CHAR/v2_step0_setup.sh"
 
 cd "$RVC"
-
 echo ""
 echo "########## STEP 1: preprocess (slice + 40k) ##########"
 $PYTHON -u infer/modules/train/preprocess.py \
@@ -31,5 +30,14 @@ $PYTHON -u infer/modules/train/extract_feature_print.py cuda:0 1 0 "logs/$EXP" v
 echo "feature files: $(ls logs/$EXP/3_feature768 2>/dev/null | wc -l)"
 
 echo ""
+echo "########## STEP 3a: slice scoring + selection (target ${TARGET_MIN}min) ##########"
+cd "$CHAR"
+$PYTHON -u _score_slices.py --exp "$EXP" --target-min "$TARGET_MIN"
+
+echo ""
+echo "########## STEP 3b: filelist (selected slices only) ##########"
+$PYTHON -u v2_step3b_filelist.py --exp "$EXP" \
+    --keep-list "$RVC/logs/$EXP/selected_slices.txt"
+
+echo ""
 echo "########## PREP COMPLETE ##########"
-ls -la "logs/$EXP/" | head -12

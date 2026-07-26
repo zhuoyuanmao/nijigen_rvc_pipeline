@@ -18,7 +18,7 @@ from pathlib import Path
 import soundfile as sf
 import torch
 
-PROJECT = Path(__file__).resolve().parents[2]  # repo/project root
+PROJECT = Path(__file__).resolve().parents[2]
 RVC_DIR = PROJECT / "Retrieval-based-Voice-Conversion-WebUI"
 CHAR = PROJECT / "characters/honoka"
 MODELS_DIR = CHAR / "models"

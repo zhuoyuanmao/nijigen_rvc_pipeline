@@ -27,7 +27,6 @@ file level instead of one giant concat (no cross-song slices).
 from __future__ import annotations
 
 import argparse
-import os
 import shutil
 import subprocess
 import time
@@ -42,12 +41,9 @@ from _prep_source_v4 import (separator_pass, VOCALS_MODELS,
                              DEREVERB_MODEL, DEREVERB_STEM)
 
 CHAR = Path(__file__).resolve().parent
-# Raw full-mix song downloads, one dir per voice. Point RAW_DIR at wherever
-# yours live (default: <project>/raw/<voice>_raw).
-RAW_DIR = Path(os.environ.get("RAW_DIR", Path(__file__).resolve().parents[2] / "raw"))
 RAW = {
-    "otoya": RAW_DIR / "otoya_raw",
-    "sho":   RAW_DIR / "sho_raw",
+    "otoya": Path("raw/otoya_raw"),
+    "sho":   Path("raw/sho_raw"),
 }
 OUT = CHAR / "data/v45_corpus"
 WORK = CHAR / "data/v45_work"

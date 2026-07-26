@@ -17,8 +17,8 @@
 #   setsid bash v2_step4_train.sh > logs/train_v2.log 2>&1 &
 set -e
 PROJECT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-RVC="${RVC_DIR:-$PROJECT/Retrieval-based-Voice-Conversion-WebUI}"
-PYTHON="${PYTHON:-$PROJECT/.venv/bin/python}"
+RVC=$PROJECT/Retrieval-based-Voice-Conversion-WebUI
+PYTHON=$PROJECT/.venv/bin/python
 EXP=otoya_sho_mix_v2
 cd "$RVC"
 

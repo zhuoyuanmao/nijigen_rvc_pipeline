@@ -1,17 +1,17 @@
 ###############################################################################
-# Known-working dependency set (RVC v2 · 40kHz · RMVPE · ContentVec 768).
+# Actual working dependency set of the live .venv (verified 2026-07-25).
+# Process/config reference: ../METHODOLOGY.md (single source of truth).
 #
-# torch is installed from the CUDA wheel index, e.g.:
-#   pip install torch==2.5.1 torchaudio --index-url https://download.pytorch.org/whl/cu121
-# The rest are the versions this pipeline was validated against. There is a
-# triangular constraint between RVC (numba/numpy/fairseq), demucs (torch>=2),
-# and audio-separator (torch>=2 + onnxruntime-gpu); if you let pip auto-resolve
-# from scratch, pin torch first, then install the rest.
+# torch is installed from the CUDA wheel index (NOT PyPI):
+#   pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cu121
+# There is a triangular constraint between RVC (numba/numpy/fairseq), demucs
+# (torch>=2), and audio-separator (torch>=2 + onnxruntime-gpu). Pin torch
+# first if resolving from scratch.
 ###############################################################################
 
-# --- PyTorch (from the cu121 wheel index, NOT PyPI) ---
-torch==2.5.1
-torchaudio                # match your torch / CUDA build
+# --- PyTorch (cu121 wheel index) ---
+torch==2.5.1                 # installed as 2.5.1+cu121
+torchaudio==2.1.2            # 2.1.2+cu121 — predates the torch bump but works here
 
 # --- RVC training/runtime stack ---
 numpy==1.26.4
@@ -23,23 +23,25 @@ faiss-cpu==1.7.3
 pyworld==0.3.2
 torchcrepe==0.0.20
 praat-parselmouth>=0.4.2
-einops>=0.8
+einops==0.8.2
 
 # --- source separation ---
-demucs==4.0.1                     # optional; v4.5 corpus prep uses Roformer instead
-audio-separator[gpu]>=0.24        # Roformer/MDX separators; pulls onnxruntime-gpu
-#   IMPORTANT: install ONLY onnxruntime-gpu, never onnxruntime (CPU) alongside it —
-#   the CPU package shadows the GPU one and the CUDA provider disappears.
+demucs==4.0.1                # optional; v4.5 corpus prep uses Roformer instead
+audio-separator[gpu]==0.44.2 # Roformer/MDX separators
+onnxruntime-gpu==1.20.2
+#   ⚠️ install ONLY onnxruntime-gpu — never the CPU `onnxruntime` alongside it;
+#   the CPU package shadows the GPU one and the CUDA provider disappears
+#   (see METHODOLOGY §8).
 
 # --- audio I/O + DSP ---
-soundfile>=0.12
-scipy>=1.10
-resampy>=0.4
-pyloudnorm>=0.2
+soundfile==0.14.0
+scipy==1.15.3
+resampy==0.4.3
+pyloudnorm==0.2.0
 
 # --- training helpers ---
-tensorboard
-tqdm>=4.63
-pydub>=0.25
-scikit-learn>=1.1
+tensorboard==2.21.0
+tqdm==4.68.3
+pydub==0.25.1
+scikit-learn==1.7.2
 Cython

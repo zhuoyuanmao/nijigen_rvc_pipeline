@@ -4,13 +4,12 @@
 > 本文档只记 honoka 特有的内容 (亮嗓女高音参数、呼吸修复、v2 择优方案 §十)。
 >
 > 日期: 2026-07-19 | 模型: RVC v2 | 角色: Honoka Kousaka (穂乃果) | GPU: RTX 3090 24GB
-> 注: §3-4 的推理侧方法 (V3 ensemble / P 链 / 分轨混音) 承袭更早的项目实战,
-> 属 v1 时代经验; v2 的结论 (§九、§十 + [METHODOLOGY](../../METHODOLOGY.md)) 已大幅简化这些。
+> 参考: [Liyuu KNOWHOW](../liyuu/KNOWHOW.md) — 大量方法论来自 Liyuu 项目实战
 >
-> ✅ **2026-07-25 推理侧优化完成** — 见 §九。最佳成品:
-> `output/tokyo_summer_v3/stage5_rebuilt/vocals_rebuilt_flat_medens.wav`
-> (>15.5k 窄带峰 57→1, 3-5k 毛刺 +6.5→+0.1dB, 动态恢复到源水平)。
-> 方法论背景见 [otoya_sho_mix/KNOWHOW.md](../otoya_sho_mix/KNOWHOW.md) §6-7。
+> ✅ **2026-07-25 推理侧优化完成** — 见 §九。
+> 🔥 **2026-07-26 v2 训练侧重做 + TITAN A/B 完成** — 见 §十一。待用户耳测:
+> `output/tokyo_summer_v3/_AB_v2_baseline_vs_titan/`。
+> 方法论背景见 [otoya_sho_mix/KNOWHOW.md](../otoya_sho_mix/KNOWHOW.md) §6-7、§10。
 
 ---
 
@@ -465,3 +464,100 @@ HNR 低于地板 · F0 不稳 (>30% 帧跳八度 = 提取失败)。
   [../../METHODOLOGY.md](../../METHODOLOGY.md) §8); 磁盘已清 43G
 - 待建: `_score_slices.py` (--target-min 180) + honoka 版 v2 step 脚本, 按 §10.3 跑。
 - 统一流程见 [../../METHODOLOGY.md](../../METHODOLOGY.md) (跨音色方法论)。
+
+---
+
+## 十一、honoka v2 执行 + TITAN 底模 A/B (2026-07-26)
+
+### 11.1 执行概况
+
+按 §十 方案跑完, 外加一个 **TITAN 社区底模 A/B 实验臂** (用户批准, 探索
+"官方 pretrain 是否是配方里唯一还停在默认的组件")。
+
+- **语料**: 58 raw 轨 → v4.5 重制 (脏度 −52.9dB, 呼吸密度 15-22/min, 82.8min CPU)
+- **切片择优** (`_score_slices.py`): 3666 切片 → 硬剔 45 → 择优 **2945 片 = 180min**,
+  **58/58 曲全覆盖** (按曲配额 1.4× + F0 六分箱都生效)
+- **双臂训练** (仅 `-pg/-pd` 不同, 特征/filelist/超参全同 → 归因干净):
+  - baseline: 官方 f0G40k/f0D40k
+  - titan: `assets/pretrained_v2_titan/{G,D}-f040k-TITAN.pth` (blaise-tk/TITAN,
+    11.15h Expresso 继续预训练; 与 RVC v2 40k 架构兼容, `All keys matched`)
+  - 各 200ep/se20/~4.7h, mel 收敛 ~20.5 (亮嗓宽音域, 地板天然高于 otoya 的 18.6)
+
+### 11.2 A/B 客观结果 (`_ab_eval_v2.py`, seg_000)
+
+核心问题: **两种底模各修回多少 honoka 的 12-15.5k 空气感缺陷** (v1 未解)。
+
+| 版本 | peaks | **air12** | rolloff | 音色 | breath(raw) |
+|---|---:|---:|---:|---:|---:|
+| 源 | 0 | −13.1 | 14559 | 82.2 | 71/190 |
+| v1 冠军 | 1 | −30.2 | 10579 | 45.7 | 93/190 |
+| baseline 最优 e202 | 0 | −28.6 | 10957 | 46.1 | 174 |
+| **TITAN 最优 e182** | 0 | **−26.5** | **11999** | 46.0 | 182 |
+| TITAN e121 (音色最优) | 0 | −28.1 | 11703 | **43.2** | 185 |
+
+**结论 (客观层面)**:
+1. **TITAN 一致地更亮**——air12 −26.5 vs baseline −28.6 vs v1 −30.2; rolloff
+   12k vs 11k vs 10.6k。正好补 honoka 最弱的空气感, 是社区底模在**这个音色**上的
+   真实(虽不大)增益。
+2. 但缺陷**只部分修复**——仍比源 −13.1 低 ~13dB, 是模型能力上限, TITAN 也没填平。
+3. 两臂都干净 (peaks 0)。
+4. **breath 那列两臂都 ~180, 不是差异项**——裸推理未加 breath-fix (v1 的 93 是
+   加了 fix 的); 选定后照跑 `_fix_breaths` 压下来。
+
+**倾向**: TITAN 臂略胜 (空气感 + rolloff), 但差距小, **最终耳测定夺**。
+TITAN 内部有取舍: e182 最亮 (air −26.5, 音色 46), e121 音色最优 (43.2, air −28.1)。
+
+### 11.3 耳测发现: 单 ckpt 的"和声噪音", 中值谱 ensemble 解决 (最终定案)
+
+**用户耳测反馈**: v2 单 ckpt 相比 v1 "背后像有个和声噪音", v1 反而"更实"。
+**客观查实 (`chorus_diag.py`)**——用户耳朵是对的:
+
+| 版本 | 谐波间噪声(300-4k平坦度) | 梳齿 peaks | 体量(300-1k) |
+|---|---:|---:|---:|
+| 源 | 0.0123 | 0 | −2.0 |
+| v1 波形 ensemble | 0.0135 | **25** | −0.8 |
+| **v2 单 ckpt** | **0.0214** (和声噪音) | 0 | −2.8 |
+| v2 baseline 中值 | 0.0159 | 0 | −2.6 |
+| **v2 titan 中值** | **0.0149** | **0** | −2.5 |
+
+- **根因**: v1 是 3-ckpt **波形平均** → 谐波相位一致被增强, 谐波间非相干噪声互相
+  抵消 → 干净且"实"; **单 ckpt 无此抵消 → 谐波间噪声裸露** = 和声噪音。
+  (但 v1 的干净有代价: 25 个 >15.5k 电流梳齿。)
+- **解**: **中值谱 ensemble** (top-k v2 ckpt 幅度谱逐 bin 中值 + 最佳相位) —— 谐波间
+  噪声降到 0.0149 (近源), **且 peaks 仍 0** (中值剔除梳齿, 不像波形平均叠加)。两全。
+- **可从 stage8 逐 ckpt 输出直接算, 不占 GPU** (`median_from_stage8.py`)。
+- "v1 更实" = v1 比源多 +1.2dB 低-中暖色 (染色非保真); 需要的话加 <600Hz +2dB 低搁架。
+
+> **方法论修正**: §十 "训对后单 ckpt = 逐段选优/ensemble" 对 otoya (混合男声) 成立,
+> 但**亮嗓女高音是例外**——单 ckpt 会暴露谐波间噪声, **中值谱 ensemble 才是真最优**。
+> 已写入 [METHODOLOGY §7](../../METHODOLOGY.md)。
+
+### 11.4 最终成品 (用户 2026-07-26 定案)
+
+**`stage5_rebuilt/FINAL_honoka_v2.wav`** = **TITAN 中值谱 ensemble + 呼吸静音**
+(`_AB.../8m_titan_MEDIAN_breath-muted.wav`)。
+- 底模: TITAN (亮嗓空气感略胜 baseline)
+- 重建: 6 个 e100-200 ckpt 的中值谱 ensemble (无和声噪音, 无梳齿)
+- 呼吸: 全静音 (用户口味; 裸干声上句尾呼吸偏突出, 混 BGM 后本会被盖)
+
+试听全集 (供复核): `output/tokyo_summer_v3/_AB_v2_baseline_vs_titan/`
+0=v1冠军 1=单ckpt(有和声噪音) 2/3=单ckpt亮/音色 4/5/6=呼吸-8/-18/静音
+7(w)=baseline中值(暖) 8(w/m)=titan中值(暖/静音) 9=源。
+
+### 11.5 待用户耳测 (原始 A/B 记录, 已被 §11.4 取代)
+
+底模 A/B 结论仍成立 (TITAN 略亮), 但成品形态从"单 ckpt"改为"中值谱 ensemble"。
+
+### 11.4 产物与脚本
+
+```
+models_v2/        baseline 10 ckpt infer + flat 索引 (537,174 向量, 仅入选切片)
+models_v2_titan/  TITAN 10 ckpt infer
+_prep_corpus_v45.py / _score_slices.py / v2_step{0,3b,4,6}*.sh /
+_build_flat_index_v2.py / _ab_eval_v2.py
+tools/download_titan_pretrain.sh   (TITAN 底模下载+校验)
+```
+
+> **对后续 4 个音色的启示**: TITAN 在亮嗓女高音上有小增益; 是否值得作默认底模,
+> 取决于耳测结论。若确认 TITAN 胜, 后续音色可直接 `-pg/-pd` 指向 TITAN 起训,
+> 零额外成本。见 [../../METHODOLOGY.md](../../METHODOLOGY.md) §6。

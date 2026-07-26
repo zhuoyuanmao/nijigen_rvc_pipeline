@@ -135,6 +135,14 @@ python train.py -se 20 -te 200 -bs 16 -sr 40k -f0 1 -l 0 -sw 0 \
 | **选 ckpt** | **e100-200 窗口最佳** | 早到避免后期漂移, 晚到让音色 settle |
 | batch | 16 | 3090 24GB |
 
+> **底模选择 (2026-07-26 双音色 A/B 定论)**: **TITAN 是亮嗓工具, 男声用官方 f0G40k**。
+> 社区底模 TITAN (blaise-tk/TITAN, 40k, 与 v2 架构兼容, `tools/download_titan_pretrain.sh`,
+> 仅换 `-pg/-pd`) 实测:
+> - **honoka 亮嗓女高音**: 空气感/亮度**小胜** (air12 −26.5 vs baseline −28.6)。
+> - **otoya 男声**: 音色**反而略差** (39.5→41.0), 无空气感缺陷 → TITAN 用不上。
+>
+> **规则**: 亮嗓/女高音 → TITAN; 男声/暗嗓 → 官方 f0G40k。见 honoka §11 / otoya A/B。
+
 - **detached 运行**: `setsid bash v2_step4_train.sh > logs/train_v2.log 2>&1 &`
   (训练不依赖终端/会话存活)。
 - **存储策略**: 训练产物全留 ext4 (`~/rvc_data/<exp>/`, 800G+ 空闲);
@@ -151,14 +159,30 @@ python train.py -se 20 -te 200 -bs 16 -sr 40k -f0 1 -l 0 -sw 0 \
 1. **部署** (`v2_step6_deploy.sh`): 15 个 ckpt 转 infer 格式, **只拷 _infer 到 C:**。
 2. **flat 全量索引** (`_build_flat_index_v2.py`): 精确检索全部特征向量。
    > 旧 IVF256 + nprobe=1 + 10k 聚类中心 = 检索形同关闭 (音色距离差 1.9-3.1)。
-3. **单中段 ckpt 重建** (`_build_single_ckpt.py`): e100-200 全 ckpt 打分, 选综合
-   最优一个, 整曲用它 (per-seg RMS + crossfade, 无 EQ)。
-   - 实测 v2 各 ckpt 处处 peaks=0, 逐段选优/ensemble 买不到任何东西。
-   - 单模型 = 逐段选优 (客观持平), 且无段间 ckpt 切换, 更简单。
+3. **重建**: 两条路, 依音色而定 ——
+   a. **单中段 ckpt** (`_build_single_ckpt.py`): e100-200 打分选一个整曲用。简单;
+      对 otoya (混合男声) 与逐段选优/ensemble 客观持平。
+   b. **中值谱 ensemble** (`honoka/_median_ensemble.py` 或从 stage8 逐 ckpt 输出直接
+      取 top-k 幅度谱**逐 bin 中值** + 最佳 ckpt 相位): 对**亮嗓/高频丰富**音色是**真最优**。
 
-**不再需要** (都是 v1 欠训时代的补救): 波形/中值 ensemble、transpose 升八度、
-LPF+tame 修复链、逐段选 ckpt。如果 v2 仍出伪影, **先怀疑训练没跑对** (查 §2),
-而不是加推理补丁。
+   > ⚠️ **单 ckpt 的例外 (honoka 实测, 2026-07-26)**: 单 ckpt 会**裸露该 ckpt 的
+   > 谐波间噪声** (300-4k 谱平坦度 0.021 vs 源 0.012), 听感是"背后一层和声/沙噪"。
+   > **中值谱 ensemble 同时解决**: 各 ckpt 谐波间噪声落在不同 bin → 中值剔除
+   > (降到 0.015, 近源); 谐波一致 → 保留体量; 且**不叠加梳齿** (peaks 仍 0,
+   > 不像 v1 波形平均那样把梳齿取并集)。otoya 因音色不同没暴露此点, honoka 亮嗓放大了它。
+   > **规则**: 亮嗓/女高音默认用中值谱 ensemble; 单 ckpt 是"够用的简版"。
+   > **实测边界 (2026-07-26)**: otoya 男声上中值谱**不比单 ckpt 好** (谐波间噪声
+   > 0.057 vs 单 ckpt 0.054, 略高), 因为男声本无 honoka 那种谐波间噪声问题。
+   > 所以: **亮嗓 → 中值; 男声/暗嗓 → 单 ckpt**。与"底模选择"同一条分界线。
+
+**训对后不再需要的旧补救**: 波形平均 ensemble (叠加梳齿)、transpose 升八度、
+LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先查训练 (§2); 若出
+**谐波间和声噪音**, 用中值谱 ensemble。
+
+**可选的成品口味层** (混音级, 非缺陷修复):
+- **呼吸**: `_fix_breaths.py` (塞回源真呼吸, 修 RMVPE 呼吸段啸叫) / `_remove_breaths.py`
+  (−8/−18dB/静音, 嫌呼吸吵时用)。**绝不在前处理去呼吸** (会让 RVC 幻觉啸叫)。
+- **暖厚**: 低-中 (<600Hz) +2dB 低搁架, 追 v1 那种"实"的染色 (非保真)。
 
 ---
 
@@ -184,22 +208,28 @@ LPF+tame 修复链、逐段选 ckpt。如果 v2 仍出伪影, **先怀疑训练�
 
 ---
 
-## 9. 参考实现 (case studies)
+## 9. 各音色进度 (character-specific 详见各 KNOWHOW)
 
-仓库里的两个 case study 演示了本方法论的完整落地:
+本项目 = **6 音色 (3 男 + 3 女)**, 各带 solo + 男声齐唱 / 女声齐唱。
 
-| 音色 | 特点 | 看点 | KNOWHOW |
+| 音色 | 性别 | 状态 | KNOWHOW |
 |---|---|---|---|
-| **otoya_sho_mix** | 男声, otoya:sho 2:1 文件级混合 | 最完整的 v2 参考; §10 = 训练侧根治电流声 | [link](characters/otoya_sho_mix/KNOWHOW.md) |
-| **honoka** | 亮嗓女高音 | character-specific 修复参数 + 中值谱 ensemble + 呼吸修复 | [link](characters/honoka/KNOWHOW.md) |
+| otoya_sho_mix | 男 (otoya:sho 2:1) | ✅ v2 完成, 成品 e140 单模型 | [link](characters/otoya_sho_mix/KNOWHOW.md) |
+| honoka | 女 | v1 成品在; v2 计划中 (§10) | [link](characters/honoka/KNOWHOW.md) |
+| (待建 ×4) | 2男 + 2女 | 用本文档配方从头训 | — |
 
-具体某首歌的音色进度 (如東京サマーセッション 的 6 音色) 见仓库 README。
+> `liyuu` **不计入这 6 音色** — 是更早的独立项目 (中文歌翻唱, 含唐可可混合),
+> 仅作 legacy 方法论源头保留 ([link](characters/liyuu/KNOWHOW.md))。
+
+后 4 个音色: 直接用本文档配方从头训, 跳过 v1 的推理侧挣扎。
 
 ---
 
 ## 10. 文档体系
 
-- **METHODOLOGY.md (本文档)**: character-agnostic + song-agnostic, 单一真相源 —
-  训任意音色都照它。
-- **characters/<name>/KNOWHOW.md**: 各音色特有的增量与实战案例。
-- **README.md**: 项目入口 + 具体歌曲项目的进度 (東京サマーセッション …)。
+- **本文档 (METHODOLOGY.md)**: character-agnostic, 单一真相源。
+- **characters/<name>/KNOWHOW.md**: character-specific 增量。
+- **legacy (不用于当前 agent)**: `AGENT_LESSONS.md`、`README.md` (描述已死的 v1
+  通用管线)、各 `data/*RUN_ME*.md` / `data/*PIPELINE*.md`、
+  `latest_feedback/GPU_VOCAL_PREP_v4.md` (v4 原始方案, 已被 v4.5 取代) —
+  均为早期 (DeepSeek agent 时代) 产物, 保留备查, 当前流程以本文档为准。
