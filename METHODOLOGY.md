@@ -240,12 +240,22 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 
 本项目 = **6 音色 (3 男 + 3 女)**, 各带 solo + 男声齐唱 / 女声齐唱。
 
+**女声**: 3 角色配方均定稿; **2026-07-31 女声全曲干声源已录制** (又果→honoka /
+又海→umi / 又鸟→kotori, 轻前处理见 §11.4), 整曲翻唱推理进行中。
+**男声**: 除基线 otoya_sho, 本轮起在探索"哪个男声音色最合适" (多候选 A/B, 见 §11)。
+
 | 音色 | 性别 | 状态 | KNOWHOW |
 |---|---|---|---|
-| otoya_sho_mix | 男 (otoya:sho 2:1) | ✅ v2 完成, 成品 baseline 中值谱 ensemble (`FINAL_otoya_v2.wav`) | [link](characters/otoya_sho_mix/KNOWHOW.md) |
-| honoka | 女 | ✅ v2 配方定稿 (TITAN 中值谱 + 呼吸静音, 素/无 warm, §11.4, 25s 小样本耳测过); ⏳ **整曲待录女声全曲源** | [link](characters/honoka/KNOWHOW.md) |
-| kotori | 女 | ✅ v2 配方定稿 (TITAN 中值谱 + 呼吸静音, e100-180, 25s); ⏳ 整曲待录女声全曲源 | [link](characters/kotori/KNOWHOW.md) |
-| (待建 ×3) | 2男 + 1女 | 用本文档配方从头训 | — |
+| otoya_sho_mix | 男 (otoya:sho 2:1) | ✅ 基线, 成品 baseline 中值谱 (`FINAL_otoya_v2.wav`) | [link](characters/otoya_sho_mix/KNOWHOW.md) |
+| **camus** | 男 (纯单音色, 12曲) | ✅ 2026-07-31, f0G40k 中值谱; 距 toya 2.90dB **命中源歌手天花板** (§11) | [link](characters/camus/KNOWHOW.md) |
+| **otoya_tsukasa_mix** | 男 (otoya:tsukasa 2:1) | ✅ 2026-07-31, tsukasa 替 sho; 距 otoya 3.16dB (明显不同, §11) | [link](characters/otoya_tsukasa_mix/KNOWHOW.md) |
+| toya_camus_mix / _c2 | 男 (2:1 / 1:2) | ⚠️ 实验: toya≈camus 太相近, 混合听不出区别 → 用途转为 §11 天花板实证 | — |
+| honoka | 女 | ✅ 配方定稿 (TITAN 中值谱 + 呼吸静音); 🔄 整曲推理 (全曲源已录) | [link](characters/honoka/KNOWHOW.md) |
+| kotori | 女 | ✅ 配方定稿 (TITAN 中值谱 + 呼吸静音, e100-180); 🔄 整曲推理 | [link](characters/kotori/KNOWHOW.md) |
+| umi | 女 | ✅ 配方定稿 (TITAN 中值谱); 🔄 整曲推理 | — |
+
+> 成品混音 (角色 + kotori 女声 + off-vocal BGM, 24.5s 对齐样本) 交付到临时云盘;
+> 男声候选 A/B: otoya_sho / toya_camus(_c2) / cecil_ai / camus / otoya_tsukasa。
 
 > `liyuu` **不计入这 6 音色** — 是更早的独立项目 (中文歌翻唱, 含唐可可混合),
 > 本仓库不含它, 仅作本方法论的部分经验源头被提及。
@@ -258,3 +268,61 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 
 - **本文档 (METHODOLOGY.md)**: character-agnostic, 单一真相源。
 - **characters/<name>/KNOWHOW.md**: character-specific 增量。
+
+---
+
+## 11. 音色区分度天花板 — 混合 vs 纯单音色 (何时听得出) [2026-07-31]
+
+> 需求场景: 想让一个新音色"听起来不同" (如 toya_camus 太像 toya, 想更偏 camus)。
+> **教训: 单靠调数据配比 / index_rate, 感知差异可能远小于配比变化。**
+
+**先测源歌手本身的音色差距 —— 它是天花板, 模型再怎么调都超不过。**
+
+- **度量**: 全曲 LTAS (长时平均谱) 或 **log-mel 逐格 dB 差** (对数梅尔更贴感知)。
+- **刻度**: 同一歌手不同录音 ~2-3dB LTAS; 明显不同的两个歌手 ~5-8dB。
+  log-mel 逐格: **<1dB 基本听不出, ~1-2dB 微妙, >3dB 明显** (混入 BGM 后再打对折)。
+
+### 11.1 实证 (toya vs camus, 两人音色本就相近)
+
+| 对象 | 距 toya (log-mel dB) | 可闻? |
+|---|---:|---|
+| 源歌手 toya vs camus (LTAS) | **2.81** | — (天花板, "同一歌手不同录音"档) |
+| 2:1 toya:camus (混合) | 1.76 | 否 |
+| 1:2 c2 (camus 加权) | 1.90 | 否 |
+| index_rate 0.75→1.0 各版 (mix 男声段) | **全 <1.3** | 否 (用户耳测"都一样") |
+| **纯 camus 单音色** (只 12 首 camus, 无 toya) | **2.90** | ✅ 命中天花板, 终于可闻 |
+| 对照: otoya_tsukasa 2:1 (两人差异够大) | vs otoya **3.16** | ✅ 明显不同 |
+
+> index_rate 0.75→1.0 实测: 音色仅位移 ~1dB, 且 **不引入 buzz** (flatness 不升反微降)。
+
+### 11.2 决策规则
+
+1. 想要**一个听得出区别的新音色**, 而候选歌手互相相近 (源差 <3dB):
+   **混合/调 index_rate 都撞天花板 → 直接训纯单音色** (纯音色恢复源歌手的全部区分度)。
+2. 混合 (2:1) 的用途是**借某音色的特质 / 做平均**, 不是"用相近歌手 A 稀释相近歌手 B"。
+3. index_rate 对音色区分度影响有限 (~1dB), 不能替代语料选择。
+4. 想要大幅不同的音色 → 换一个**真正远离**目标 (源差 ≥5dB) 的歌手 (如 otoya→tsukasa)。
+
+> **拿到"想混一个新音色"的需求, 先花 1 分钟测源歌手 log-mel/LTAS 差, 再决定"混"还是"纯"。**
+
+### 11.3 省算力: 2:1 混音复用技巧
+
+改配比 (如 2:1→1:2, 或从 otoya_sho 换 sho→tsukasa) **不必重新分离**——分离产物
+音色无关, 只是文件级复制份数变了。**复用已分离的 `data/v45_corpus`**, 只重做 `_b`
+复制 (改 DUP_VOICE) 即可进 v2_prep_all。省 ~45min/角色的分离。
+(otoya_tsukasa 就复用了 otoya_sho 的 otoya 分离; camus 复用了 toya_camus 的 camus 分离。)
+
+### 11.4 整曲推理源准备 (male_sources / female_sources)
+
+整曲翻唱需**整曲干声源** (小样本只锁配方, §7.3)。源归集到
+`<song>/{male,female}_sources/` (男声 1 份共享给所有男角色; 女声每角色 1 份)。
+
+- 结构 = 男声推理源同构: `<src>_full.wav` (高保真原始) + `stage1_40k/source_40k.wav`
+  + `stage2_segments/` (静音切段 top_db=35, merge<3s, min2s)。
+- **轻前处理判定 (按源实测, 别默认全套)**:
+  - 干声源 (底噪 ≤ −80dB、sub-120Hz <0.5% = 无伴奏残留) → **不分离、不降噪** (§4)。
+  - 热母带 (LUFS −5~−7、峰 0dBFS、有削波, 如本轮女声源) → declip (cubic 插值 <1ms
+    平顶) + 降电平到 ~−3dBFS 留 headroom + 裁首尾静音。夏日男声源本就 −25LUFS/无削波 → 零处理。
+  - 源 SR/母带格式不影响结果 (HuBERT 16k 下采样, §4)。
+- 女声整曲推理 `index_rate=0.5` (男声 0.75); 其余同 §7 中值谱**逐段推理 + 组装**
+  (男声 `_infer_median_full` 的多段版)。
