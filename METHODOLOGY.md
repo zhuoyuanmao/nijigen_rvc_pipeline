@@ -240,22 +240,25 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 
 本项目 = **6 音色 (3 男 + 3 女)**, 各带 solo + 男声齐唱 / 女声齐唱。
 
-**女声**: 3 角色配方均定稿; **2026-07-31 女声全曲干声源已录制** (又果→honoka /
-又海→umi / 又鸟→kotori, 轻前处理见 §11.4), 整曲翻唱推理进行中。
-**男声**: 除基线 otoya_sho, 本轮起在探索"哪个男声音色最合适" (多候选 A/B, 见 §11)。
+> ⭐ **2026-07-31 定稿 6 音色 (用户拍板)**:
+> **女**: honoka · kotori · umi   **男**: otoya_tsukasa_mix · cecil_ai_mix · camus_toya20
+>
+> 男声经多候选 A/B 耳测选定 (候选: otoya_sho 基线 / toya_camus±c2 / cecil_ai / camus 纯 /
+> otoya_tsukasa / camus_toya10·20, 见 §11)。女声全曲干声源已录并出整曲翻唱
+> (又果→honoka / 又海→umi / 又鸟→kotori, §11.4, `tokyo_summer_session/female_full_covers/`)。
 
-| 音色 | 性别 | 状态 | KNOWHOW |
-|---|---|---|---|
-| otoya_sho_mix | 男 (otoya:sho 2:1) | ✅ 基线, 成品 baseline 中值谱 (`FINAL_otoya_v2.wav`) | [link](characters/otoya_sho_mix/KNOWHOW.md) |
-| **camus** | 男 (纯单音色, 12曲) | ✅ 2026-07-31, f0G40k 中值谱; 距 toya 2.90dB **命中源歌手天花板** (§11) | [link](characters/camus/KNOWHOW.md) |
-| **otoya_tsukasa_mix** | 男 (otoya:tsukasa 2:1) | ✅ 2026-07-31, tsukasa 替 sho; 距 otoya 3.16dB (明显不同, §11) | [link](characters/otoya_tsukasa_mix/KNOWHOW.md) |
-| toya_camus_mix / _c2 | 男 (2:1 / 1:2) | ⚠️ 实验: toya≈camus 太相近, 混合听不出区别 → 用途转为 §11 天花板实证 | — |
-| honoka | 女 | ✅ 配方定稿 (TITAN 中值谱 + 呼吸静音); 🔄 整曲推理 (全曲源已录) | [link](characters/honoka/KNOWHOW.md) |
-| kotori | 女 | ✅ 配方定稿 (TITAN 中值谱 + 呼吸静音, e100-180); 🔄 整曲推理 | [link](characters/kotori/KNOWHOW.md) |
-| umi | 女 | ✅ 配方定稿 (TITAN 中值谱); 🔄 整曲推理 | — |
+| 音色 | 性别 | 定稿 | 说明 | KNOWHOW |
+|---|---|:---:|---|---|
+| **honoka** | 女 | ⭐ | TITAN 中值谱 + 呼吸静音; 全曲翻唱已出 (`honoka_full.wav`) | [link](characters/honoka/KNOWHOW.md) |
+| **kotori** | 女 | ⭐ | TITAN 中值谱 + 呼吸静音 (e100-180); 全曲翻唱已出 | [link](characters/kotori/KNOWHOW.md) |
+| **umi** | 女 | ⭐ | TITAN 中值谱; 全曲翻唱已出 | — |
+| **otoya_tsukasa_mix** | 男 (otoya:tsukasa 2:1) | ⭐ | tsukasa 替 sho; 距 otoya 3.16dB (明显不同, §11) | [link](characters/otoya_tsukasa_mix/KNOWHOW.md) |
+| **cecil_ai_mix** | 男 (cecil:ai 2:1) | ⭐ | f0G40k 中值谱 | [link](characters/cecil_ai_mix/KNOWHOW.md) |
+| **camus_toya20** | 男 (camus + 20% toya) | ⭐ | 纯 camus 加 20% toya 微调档, 用户耳测选定; f0G40k 中值谱 (§11) | [link](characters/camus_toya20/KNOWHOW.md) |
+| otoya_sho_mix | 男 | 候选 | 基线 baseline 中值谱 (`FINAL_otoya_v2.wav`), 被 otoya_tsukasa 取代 | [link](characters/otoya_sho_mix/KNOWHOW.md) |
+| camus / toya_camus±c2 / camus_toya10 | 男 | 实验 | §11 音色天花板实证 (toya≈camus 混不出区别; 纯 camus 命中天花板; 小语料微调档客观不稳) | [link](characters/camus/KNOWHOW.md) |
 
-> 成品混音 (角色 + kotori 女声 + off-vocal BGM, 24.5s 对齐样本) 交付到临时云盘;
-> 男声候选 A/B: otoya_sho / toya_camus(_c2) / cecil_ai / camus / otoya_tsukasa。
+> 成品混音 (角色 + kotori 女声 + off-vocal BGM, 24.5s 对齐样本) 交付到临时云盘。
 
 > `liyuu` **不计入这 6 音色** — 是更早的独立项目 (中文歌翻唱, 含唐可可混合),
 > 本仓库不含它, 仅作本方法论的部分经验源头被提及。

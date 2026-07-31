@@ -47,15 +47,17 @@ nijigen_rvc_pipeline/
 
 ## 音色进度（6 音色 = 3 男 + 3 女）
 
+> ⭐ **2026-07-31 定稿 6 音色**：女 **honoka · kotori · umi**，男 **otoya_tsukasa_mix · cecil_ai_mix · camus_toya20**。
+
 | 音色 | 性别 | 状态 |
 |---|---|---|
-| **otoya_sho_mix** | 男 (音也:翔 2:1) | ✅ 基线，成品 baseline 中值谱 ensemble（`FINAL_otoya_v2.wav`） |
-| **camus** | 男 (纯单音色) | ✅ 2026-07-31，距 toya 2.90dB **命中源歌手天花板**（`camus-kotori_MIX.wav`） |
-| **otoya_tsukasa_mix** | 男 (音也:司 2:1) | ✅ 2026-07-31，tsukasa 替翔，距 otoya 3.16dB 明显不同 |
-| **honoka / kotori / umi** | 女 ×3 | ✅ 配方定稿（TITAN 中值谱 + 呼吸静音）；🔄 **女声全曲干声源已录**（2026-07-31），整曲推理进行中 |
+| **honoka / kotori / umi** | 女 ×3 | ⭐ 定稿（TITAN 中值谱 + 呼吸静音）；女声全曲干声源已录，**整曲翻唱已出**（`female_full_covers/`） |
+| **otoya_tsukasa_mix** | 男 (音也:司 2:1) | ⭐ 定稿，tsukasa 替翔，距 otoya 3.16dB 明显不同 |
+| **cecil_ai_mix** | 男 (cecil:ai 2:1) | ⭐ 定稿，f0G40k 中值谱 |
+| **camus_toya20** | 男 (camus + 20% toya) | ⭐ 定稿（纯 camus 加 20% toya 微调，用户耳测选定） |
+| otoya_sho / toya_camus±c2 / camus 纯 / camus_toya10 | 男 | 候选/实验 → 见 [METHODOLOGY §11](METHODOLOGY.md) 音色天花板实证 |
 
-> 男声候选 A/B 对比中（otoya_sho / toya_camus±c2 / cecil_ai / camus / otoya_tsukasa），
-> 详见 [METHODOLOGY §11 音色区分度天花板](METHODOLOGY.md)。成品混音交付到临时云盘。
+> 男声经多候选 A/B 耳测选定上述 3 个。成品混音交付到临时云盘。
 
 > `liyuu` **不属于**这 6 音色 —— 是更早的独立中文翻唱项目（含唐可可混合），
 > 本仓库不含它，只是本方法论的部分经验源头，故各处会提及 Liyuu 项目。
