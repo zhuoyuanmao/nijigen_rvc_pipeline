@@ -59,6 +59,16 @@ nijigen_rvc_pipeline/
 
 > 男声经多候选 A/B 耳测选定上述 3 个。成品混音交付到临时云盘。
 
+### 🎵 全曲成品 (2026-08-05 定稿)
+
+**`tokyo-summer-session_cast_MIX.wav`** — 227.9s，6 音色**逐句选角 (cast)** 的完整翻唱
+（−12.2 LUFS / 真峰值 −1.0 dBTP）。工作流：人工在 Audition 里**逐乐句对齐 + casting**，
+脚本做**自动混音链**（逐句调平 → 去齿音 → 男声合唱去相关 → 并发声像 → 1/√N 齐唱定律
+→ 真立体声混响 → BGM 避让 → 真峰值母带）。
+
+- 混音方法论：[METHODOLOGY §12](METHODOLOGY.md)　·　逐句参数表：[§13](METHODOLOGY.md)
+- 参考实现：[tools/mix_full_cast.py](tools/mix_full_cast.py)　·　数据：[tools/line_table.csv](tools/line_table.csv)
+
 > `liyuu` **不属于**这 6 音色 —— 是更早的独立中文翻唱项目（含唐可可混合），
 > 本仓库不含它，只是本方法论的部分经验源头，故各处会提及 Liyuu 项目。
 
