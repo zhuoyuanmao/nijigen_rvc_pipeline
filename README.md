@@ -13,6 +13,7 @@
 | 你要做什么 | 看哪个 |
 |---|---|
 | **训练/推理任意音色的完整流程与配方** | **[METHODOLOGY.md](METHODOLOGY.md)** ← 单一真相源 |
+| **看成品每句谁唱、混音怎么处理的** | **[MIX_TABLE.md](MIX_TABLE.md)** ← 逐句参数表 |
 | 某个音色的特有细节（语料、音域、成品） | `characters/<name>/KNOWHOW.md` |
 | 新歌/新音色开工前检查源音域是否 OOD | `tools/verify_source_f0.py` |
 | 看长任务日志（分离/训练，去 tqdm 乱码） | `tools/watch_log.sh` |
@@ -66,8 +67,11 @@ nijigen_rvc_pipeline/
 脚本做**自动混音链**（逐句调平 → 去齿音 → 男声合唱去相关 → 并发声像 → 1/√N 齐唱定律
 → 真立体声混响 → BGM 避让 → 真峰值母带）。
 
-- 混音方法论：[METHODOLOGY §12](METHODOLOGY.md)　·　逐句参数表：[§13](METHODOLOGY.md)
-- 参考实现：[tools/mix_full_cast.py](tools/mix_full_cast.py)　·　数据：[tools/line_table.csv](tools/line_table.csv)
+- **逐句参数表（每句谁唱 + 各维度处理值）：[MIX_TABLE.md](MIX_TABLE.md)** ← 想给人看/收 feedback 看这个
+- 混音方法论：[METHODOLOGY §12](METHODOLOGY.md)　·　参考实现：[tools/mix_full_cast.py](tools/mix_full_cast.py)
+
+> 成品表内男声按**配对的女声**命名，cast 结构一目了然：
+> `honoka-male` = otoya_tsukasa_mix　·　`kotori-male` = cecil_ai_mix　·　`umi-male` = camus_toya20
 
 > `liyuu` **不属于**这 6 音色 —— 是更早的独立中文翻唱项目（含唐可可混合），
 > 本仓库不含它，只是本方法论的部分经验源头，故各处会提及 Liyuu 项目。
