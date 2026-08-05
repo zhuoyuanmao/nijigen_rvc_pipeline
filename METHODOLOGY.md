@@ -246,12 +246,15 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 > 男声经多候选 A/B 耳测选定 (候选: otoya_sho 基线 / toya_camus±c2 / cecil_ai / camus 纯 /
 > otoya_tsukasa / camus_toya10·20, 见 §11)。女声全曲干声源已录并出整曲翻唱
 > (又果→honoka / 又海→umi / 又鸟→kotori, §11.4, `tokyo_summer_session/female_full_covers/`)。
+>
+> **2026-08-05: 三个女声的 25s 占位已按 §7 约定替换为整曲成品** —— 全曲干声源录制完成后
+> 照原配方重跑, `output/final/FINAL_<name>_v2.wav` 现为 ~208s 整曲 (占位文件已移除)。
 
 | 音色 | 性别 | 定稿 | 说明 | KNOWHOW |
 |---|---|:---:|---|---|
-| **honoka** | 女 | ⭐ | TITAN 中值谱 + 呼吸静音; 全曲翻唱已出 (`honoka_full.wav`) | [link](characters/honoka/KNOWHOW.md) |
-| **kotori** | 女 | ⭐ | TITAN 中值谱 + 呼吸静音 (e100-180); 全曲翻唱已出 | [link](characters/kotori/KNOWHOW.md) |
-| **umi** | 女 | ⭐ | TITAN 中值谱; 全曲翻唱已出 | — |
+| **honoka** | 女 | ⭐ | TITAN 中值谱 + 呼吸静音; **整曲已渲染** (`FINAL_honoka_v2.wav` 208.1s) | [link](characters/honoka/KNOWHOW.md) |
+| **kotori** | 女 | ⭐ | TITAN 中值谱 + 呼吸静音 (e100-180); **整曲已渲染** (208.5s) | [link](characters/kotori/KNOWHOW.md) |
+| **umi** | 女 | ⭐ | TITAN 中值谱 + 呼吸静音; 含 f0G40k 底模 A/B 负结果 (§底模改不了亮度) | [link](characters/umi/KNOWHOW.md) |
 | **otoya_tsukasa_mix** | 男 (otoya:tsukasa 2:1) | ⭐ | tsukasa 替 sho; 距 otoya 3.16dB (明显不同, §11) | [link](characters/otoya_tsukasa_mix/KNOWHOW.md) |
 | **cecil_ai_mix** | 男 (cecil:ai 2:1) | ⭐ | f0G40k 中值谱 | [link](characters/cecil_ai_mix/KNOWHOW.md) |
 | **camus_toya20** | 男 (camus + 20% toya) | ⭐ | 纯 camus 加 20% toya 微调档, 用户耳测选定; f0G40k 中值谱 (§11) | [link](characters/camus_toya20/KNOWHOW.md) |
