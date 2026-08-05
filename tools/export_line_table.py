@@ -177,14 +177,14 @@ HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 c
 ## 逐句表 (55 乐句)
 
 """
-md = ["| # | 时间 | 时长 | 组 | 演唱 | 歌词 | 音色 | 原始 | 静态 | 逐句 | 净增益 | 同唱 | 声像 | 齐唱缩放 | 去相关 |",
-      "|---:|---|---:|:-:|:-:|---|---|---:|---:|---:|---:|---:|:-:|---:|:-:|"]
+md = ["| # | 时间 | 时长 | 组 | 演唱 | 歌词 | 原始 | 静态 | 逐句 | 净增益 | 同唱 | 声像 | 齐唱缩放 | 去相关 |",
+      "|---:|---|---:|:-:|:-:|---|---:|---:|---:|---:|---:|:-:|---:|:-:|"]
 csv = ["idx,start_s,end_s,dur_s,group,singer,lyric,voice,raw_dbfs,static_gain_db,phrase_gain_db,"
        "net_gain_db,concurrent_voices,pan,unison_scale_db,humanize"]
 for i,r in enumerate(rows,1):
     pan = "C" if abs(r["pan"])<0.02 else (f"L{abs(r['pan'])*100:.0f}" if r["pan"]<0 else f"R{r['pan']*100:.0f}")
     ly = lyric(r["voice"], r["t0"]); g = GRP[r["voice"]]; s = SNG[r["voice"]]
-    md.append(f"| {i} | {fmt(r['t0'])}–{fmt(r['t1'])} | {r['t1']-r['t0']:.1f}s | {g} | {s} | {ly} | `{r['voice']}` | "
+    md.append(f"| {i} | {fmt(r['t0'])}–{fmt(r['t1'])} | {r['t1']-r['t0']:.1f}s | {g} | {s} | {ly} | "
               f"{r['raw']:.1f} | {r['sg']:+.1f} | {r['pg']:+.1f} | **{r['net']:+.1f}** | {r['n']:.1f} | {pan} | "
               f"{r['scale']:+.1f} | {'是' if r['hum']>0.5 else '—'} |")
     csv.append(f"{i},{r['t0']:.2f},{r['t1']:.2f},{r['t1']-r['t0']:.2f},{g},{s},\"{ly}\",{r['voice']},{r['raw']:.1f},"
