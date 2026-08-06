@@ -261,9 +261,10 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 | otoya_sho_mix | 男 | 候选 | 基线 baseline 中值谱 (`FINAL_otoya_v2.wav`), 被 otoya_tsukasa 取代 | [link](characters/otoya_sho_mix/KNOWHOW.md) |
 | camus / toya_camus±c2 / camus_toya10 | 男 | 实验 | §11 音色天花板实证 (toya≈camus 混不出区别; 纯 camus 命中天花板; 小语料微调档客观不稳) | [link](characters/camus/KNOWHOW.md) |
 
-> ⭐ **2026-08-05 全曲成品定稿**: `tokyo-summer-session_lovelive-cover_v5.wav` (227.9s, −12.2 LUFS,
-> 真峰值 −1.0 dBTP) —— 6 音色逐句选角 (cast) 的完整翻唱, 人工 AU 逐乐句对齐 + 自动混音链
-> (**§12**), 逐句参数见 **§13**。早期各音色 24.5s 对齐样本一并保留在临时云盘。
+> ⭐ **2026-08-07 全曲成品定稿**: `tokyo-summer-session_lovelive-cover_v5.wav` (227.9s / 62 乐句,
+> −12.2 LUFS, 真峰值 −1.0 dBTP) —— 6 音色逐句选角 (cast) 的完整翻唱: 人工 AU 逐乐句对齐
+> + 自动混音链 (**§12**) + 参照原唱的外科式修音 (**§12.5**, 17/62 句)。逐句参数见 **§13**。
+> 早期各音色 24.5s 对齐样本一并保留在临时云盘。
 
 > `liyuu` **不计入这 6 音色** — 是更早的独立项目 (中文歌翻唱, 含唐可可混合),
 > 本仓库不含它, 仅作本方法论的部分经验源头被提及。
@@ -276,6 +277,21 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 
 - **本文档 (METHODOLOGY.md)**: character-agnostic, 单一真相源。
 - **characters/<name>/KNOWHOW.md**: character-specific 增量。
+- **[MIX_TABLE.md](MIX_TABLE.md)**: 本曲成品的逐句参数表 (给人看 / 收 feedback)。
+
+### `tools/` 一览
+
+| 脚本 | 用途 | 见 |
+|---|---|---|
+| `verify_source_f0.py` | 推理源 F0 音域门禁 (OK/EDGE/OOD + transpose 建议) | §4 |
+| `watch_log.sh` | 长任务日志 (清 tqdm CR 乱码) | §6 |
+| `download_rvc_pretrains.sh` / `download_titan_pretrain.sh` | 取官方 / TITAN 底模 | §6 |
+| `mix_full_cast.py` | 整曲成品混音链 (调平/去相关/声像/母带) | §12 |
+| `pitch_correct.py` | 参照原唱的外科式修音 (PSOLA) | §12.5 |
+| `build_pitch_json.py` | 合并音准诊断 + 修音日志 → 表格数据源 | §12.5 |
+| `export_line_table.py` | 由分轨直接生成 MIX_TABLE.md / line_table.csv | §13 |
+
+> 表格数据**由混音链的分析阶段直接导出**, 与实际施加的处理值一致, 非人工誊写。
 
 ---
 
@@ -341,7 +357,7 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 
 ---
 
-## 12. 整曲成品混音 (对齐 + 自动混音链) [2026-08-05 定稿]
+## 12. 整曲成品混音 (对齐 + 自动混音链) [2026-08-05 建立, 08-07 定稿]
 
 > 从 6 条整曲翻唱 (`{male,female}_full_covers/`) + off-vocal BGM 到**可发布成品**。
 > 分工: **人工负责创作决策** (逐句选角 casting + 逐乐句对齐), **脚本负责工程处理**
@@ -367,13 +383,15 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 ### 12.2 自动混音链 (`mix_full_cast.py`)
 
 ```
+[可选] 修音: 参照原唱逐句校音 (§12.5) —— 只改真正偏了的句子, 其余逐采样不动
 每音色: HPF75 → 静态增益 (整轨均值 → 目标) → 逐句恒定增益 → 缓慢 leveler (±4dB)
         → de-ess → 轻胶合压缩 → 逐声部前瞻限幅 (−1dBFS)
-合唱处理: 男声人性化去相关 (仅合唱段) → 并发门控声像 → 1/√N 齐唱定律
+合唱处理: 男声人性化去相关 (仅合唱段: 时值/颤音/共振峰) → 并发门控声像 → 1/N^P 齐唱定律
 总线:   低搁架(180,+1.5) + 临场(3.8k,+1.5) + 胶合压缩 → 真立体声混响 (send 0.10)
 BGM:    人声活动联动闪避 (−1.2dB)
 母带:   LUFS −12 → 限幅 → 4× 过采样真峰值 ≤ −1.0 dBTP
 ```
+> 修音在**混音之前**做 (改的是分轨), 所以混音链完全不用改; 详见 §12.5。
 
 **目标电平**: 人声 = BGM 有声段 RMS **+5dB** (本曲 BGM −16.9 → 目标 −11.9 dBFS)。
 

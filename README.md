@@ -1,8 +1,9 @@
 # nijigen_rvc_pipeline — 动漫角色 RVC 翻唱生产线
 
 用 RVC v2 声音转换，把一首日语歌翻唱成**动漫角色音色**的成品。
-当前项目：《東京サマーセッション》（男女对唱）的 **6 音色翻唱**
-（3 男 + 3 女，每个音色出 solo，另有男声齐唱 / 女声齐唱）。
+当前项目：《東京サマーセッション》（男女对唱）的 **6 音色翻唱**（3 男 + 3 女）。
+每个音色有整曲 solo（`{male,female}_full_covers/`），成品是**逐句选角（cast）版**——
+每句歌词派给一个音色，副歌段三男齐唱 / 六人齐唱。
 
 本机 RTX 3090 (WSL Ubuntu, `.venv` torch 2.5.1+cu121)，全流程本地跑。
 
@@ -60,15 +61,20 @@ nijigen_rvc_pipeline/
 
 > 男声经多候选 A/B 耳测选定上述 3 个。成品混音交付到临时云盘。
 
-### 🎵 全曲成品 (2026-08-05 定稿)
+### 🎵 全曲成品 (2026-08-07 定稿)
 
-**`tokyo-summer-session_lovelive-cover_v5.wav`** — 227.9s，6 音色**逐句选角 (cast)** 的完整翻唱
-（−12.2 LUFS / 真峰值 −1.0 dBTP）。工作流：人工在 Audition 里**逐乐句对齐 + casting**，
-脚本做**自动混音链**（逐句调平 → 去齿音 → 男声合唱去相关 → 并发声像 → 1/√N 齐唱定律
-→ 真立体声混响 → BGM 避让 → 真峰值母带）。
+**`tokyo-summer-session_lovelive-cover_v5.wav`** — 227.9s / 62 乐句，6 音色**逐句选角 (cast)** 的
+完整翻唱（−12.2 LUFS / 真峰值 −1.0 dBTP）。
 
-- **逐句参数表（每句谁唱 + 各维度处理值）：[MIX_TABLE.md](MIX_TABLE.md)** ← 想给人看/收 feedback 看这个
-- 混音方法论：[METHODOLOGY §12](METHODOLOGY.md)　·　参考实现：[tools/mix_full_cast.py](tools/mix_full_cast.py)
+工作流：人工在 Audition 里**逐乐句对齐 + casting** → 脚本做**自动混音链**
+（逐句调平 → 去齿音 → **男声齐唱去相关** → 并发声像 → 齐唱定律 → 真立体声混响
+→ BGM 避让 → 真峰值母带）→ **参照原唱的外科式修音**（17/62 句）。
+
+- **逐句参数表（每句谁唱 + 各维度处理值 + 音准/修音）：[MIX_TABLE.md](MIX_TABLE.md)** ← 想给人看/收 feedback 看这个
+- 混音方法论：[METHODOLOGY §12](METHODOLOGY.md)　·　修音：[§12.5](METHODOLOGY.md)
+- 参考实现：[tools/mix_full_cast.py](tools/mix_full_cast.py)（混音）·
+  [tools/pitch_correct.py](tools/pitch_correct.py)（修音）·
+  [tools/export_line_table.py](tools/export_line_table.py)（生成本表）
 
 > 成品表内男声按**配对的女声**命名，cast 结构一目了然：
 > `honoka-male` = otoya_tsukasa_mix　·　`kotori-male` = cecil_ai_mix　·　`umi-male` = camus_toya20
@@ -94,6 +100,12 @@ nijigen_rvc_pipeline/
 6. **音色区分度有天花板**（§11）：想混一个"听得出不同"的新音色前，先测**源歌手本身**的
    log-mel/LTAS 差。歌手相近（<3dB）时，调配比/index_rate 都撞天花板、听不出——
    要用**纯单音色**才能恢复全部区分度（camus 纯版 2.90dB vs 混合 1.76dB 实证）。
+7. **同源人声齐唱会融合成一个人**（§12.3）：三个男声由同一条源演唱推理 → 时值/F0 逐采样
+   相同，耳朵按共同起音归并成单一声源。时值错开有 **~30ms 硬上限**（超过变回声）；
+   真正管用的是**共振峰微移**（不同体型）+ **独立颤音**。
+8. **修音要先测量**（§12.5）：RVC 忠实保留源演唱的 F0，音准问题只来自演唱本身。本曲实测
+   中位偏差仅 20 音分 → 只修 17/62 句。对唱歌曲尤其危险：参照里可能是**另一个声部**，
+   八度折叠还会把"男女差 16 个半音"伪装成"中等走音"，照修会把声部拽错。
 
 ---
 
