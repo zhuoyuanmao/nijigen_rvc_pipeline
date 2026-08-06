@@ -57,6 +57,28 @@ def lyric(lab, t0):
         k = (lab, int(t0)+d)
         if k in LY: return LY[k]
     return "—"
+
+# pitch diagnostic + correction, keyed "voice|startsecond" (built by build_pitch_json.py)
+import json as _json, os as _os
+_PJ = "/mnt/c/Users/kevin/Desktop/tokyo_summer_session_au/pitch_data.json"
+PITCH = _json.load(open(_PJ, encoding="utf-8")) if _os.path.exists(_PJ) else {}
+def pitch_of(lab, t0):
+    for d in (0, -1, 1):
+        r = PITCH.get(f"{lab}|{int(t0)+d}")
+        if r: return r
+    return {}
+def pitch_cols(lab, t0):
+    r = pitch_of(lab, t0)
+    if not r or "dev" not in r:
+        return "—", "—"
+    if not r.get("usable", True):
+        # reference held the other duet voice / a harmony there
+        oct_ = round(r["dev"]/1200)
+        note = f"参照异声" if abs(r["dev"] - oct_*1200) > 80 else f"低{abs(oct_)}八度" if oct_ < 0 else f"高{oct_}八度"
+        return f"n/a ({note})", "—"
+    dev = f"{r['dev']:+d} ct"
+    sh = r.get("shift")
+    return dev, (f"**{sh:+d} ct**" if sh else "—")
 BASE_PAN = {"honoka": -0.22, "kotori": 0.0, "umi": +0.22,
             "otoya-tsuka": -0.22, "cecil-ai": 0.0, "camus-toya": +0.22}
 files = glob.glob(D + "/*.wav")
@@ -164,6 +186,8 @@ HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 c
 
 | 列 | 含义 |
 |---|---|
+| **音准偏差** | 与**原唱同段**的音高差 (音分, +=偏高)。`n/a` = 该处原唱是**另一个声部/和声**, 无法比对 (原曲是二重唱); 括号里注明是低/高八度还是异音 |
+| **修音** | 实际施加的 PSOLA 移调量。只修"偏差 ≥25 音分**且**稳定"的句子, 其余**逐采样不动** |
 | 原始电平 | 该句在对齐 stem 里的原始 RMS (dBFS) |
 | 静态增益 | 整轨均值 → 目标的固定增益 (女 +8~9 / 男 +17~18dB — 男声源本就轻约 9dB) |
 | 逐句增益 | 在静态之上, 该句为达到统一目标的额外增减 (逐句恒定, 只在句间过渡) |
@@ -178,17 +202,20 @@ HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 c
 ## 逐句表 (55 乐句)
 
 """
-md = ["| # | 时间 | 时长 | 组 | 演唱 | 歌词 | 原始 | 静态 | 逐句 | 净增益 | 同唱 | 声像 | 齐唱缩放 | 去相关 |",
-      "|---:|---|---:|:-:|:-:|---|---:|---:|---:|---:|---:|:-:|---:|:-:|"]
-csv = ["idx,start_s,end_s,dur_s,group,singer,lyric,voice,raw_dbfs,static_gain_db,phrase_gain_db,"
-       "net_gain_db,concurrent_voices,pan,unison_scale_db,humanize"]
+md = ["| # | 时间 | 时长 | 组 | 演唱 | 歌词 | 音准偏差 | 修音 | 原始 | 静态 | 逐句 | 净增益 | 同唱 | 声像 | 齐唱缩放 | 去相关 |",
+      "|---:|---|---:|:-:|:-:|---|---:|---:|---:|---:|---:|---:|---:|:-:|---:|:-:|"]
+csv = ["idx,start_s,end_s,dur_s,group,singer,lyric,voice,pitch_dev_ct,pitch_shift_ct,raw_dbfs,"
+       "static_gain_db,phrase_gain_db,net_gain_db,concurrent_voices,pan,unison_scale_db,humanize"]
 for i,r in enumerate(rows,1):
     pan = "C" if abs(r["pan"])<0.02 else (f"L{abs(r['pan'])*100:.0f}" if r["pan"]<0 else f"R{r['pan']*100:.0f}")
     ly = lyric(r["voice"], r["t0"]); g = GRP[r["voice"]]; s = SNG[r["voice"]]
-    md.append(f"| {i} | {fmt(r['t0'])}–{fmt(r['t1'])} | {r['t1']-r['t0']:.1f}s | {g} | {s} | {ly} | "
+    dev, sh = pitch_cols(r["voice"], r["t0"])
+    pr = pitch_of(r["voice"], r["t0"])
+    md.append(f"| {i} | {fmt(r['t0'])}–{fmt(r['t1'])} | {r['t1']-r['t0']:.1f}s | {g} | {s} | {ly} | {dev} | {sh} | "
               f"{r['raw']:.1f} | {r['sg']:+.1f} | {r['pg']:+.1f} | **{r['net']:+.1f}** | {r['n']:.1f} | {pan} | "
               f"{r['scale']:+.1f} | {'是' if r['hum']>0.5 else '—'} |")
-    csv.append(f"{i},{r['t0']:.2f},{r['t1']:.2f},{r['t1']-r['t0']:.2f},{g},{s},\"{ly}\",{r['voice']},{r['raw']:.1f},"
+    csv.append(f"{i},{r['t0']:.2f},{r['t1']:.2f},{r['t1']-r['t0']:.2f},{g},{s},\"{ly}\",{r['voice']},"
+               f"{pr.get('dev','')},{pr.get('shift','')},{r['raw']:.1f},"
                f"{r['sg']:.1f},{r['pg']:.1f},{r['net']:.1f},{r['n']:.2f},{r['pan']:.2f},{r['scale']:.1f},{r['hum']:.2f}")
 R="/mnt/c/Users/kevin/ai_sing_by_ai/nijigen_rvc_pipeline/"
 open(R+"MIX_TABLE.md","w",encoding="utf-8").write(HEAD + "\n".join(md) + "\n")
