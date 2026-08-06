@@ -1,7 +1,7 @@
 # 逐句混音参数表 — 東京サマーセッション (6 音色 cast 版)
 
-> 成品: **`tokyo-summer-session_cast_MIX_v2.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
-> — v2 = 全部歌词补齐 (62 乐句) + 男声齐唱去相关加强
+> 成品: **`tokyo-summer-session_cast_MIX_v3.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
+> — 全部歌词补齐 (62 乐句) + 男声齐唱去相关 (时值/音高 + **共振峰微移 + 独立颤音**)
 > 混音方法论: [METHODOLOGY §12](METHODOLOGY.md) · 参考实现: [tools/mix_full_cast.py](tools/mix_full_cast.py)
 > 机器可读版: [tools/line_table.csv](tools/line_table.csv)
 

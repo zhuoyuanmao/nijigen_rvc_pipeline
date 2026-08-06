@@ -16,7 +16,7 @@ import pyloudnorm as pyln
 
 SR = 44100
 D = "/mnt/c/Users/kevin/Desktop/tokyo_summer_session_au/导出"
-OUT = "/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/tokyo_summer_session/tokyo-summer-session_cast_MIX_v2.wav"
+OUT = "/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/tokyo_summer_session/tokyo-summer-session_cast_MIX_v3.wav"
 VOICES = ["honoka", "kotori", "umi", "otoya-tsuka", "cecil-ai", "camus-toya"]
 BASE_PAN = {"honoka": -0.22, "kotori": 0.0, "umi": +0.22,
             "otoya-tsuka": -0.22, "cecil-ai": 0.0, "camus-toya": +0.22}
@@ -117,7 +117,36 @@ def activity(y, floor_rel=-38.0, smooth=0.15):
     thr = np.max(env) * 10**(floor_rel/20)
     return np.clip(zsm((env > thr).astype(np.float64), smooth), 0.0, 1.0)
 
-def humanize(y, static_ms, seed, gate, walk_ms=12.0, walk_tc=1.0, lvl_db=1.2):
+def formant_shift(y, factor, gate, n_fft=2048, hop=512, lifter=40, max_db=12.0):
+    """Vocal-tract-length change: warp the smooth spectral envelope along frequency
+    and apply the warped/original ratio as a gain, keeping the original phase and
+    harmonic fine structure. Pitch is unaffected; the singer just sounds like a
+    different-SIZED person — the strongest 'different human' cue there is.
+    Per-frame factor is interpolated with `gate`, and factor 1.0 is EXACTLY identity,
+    so solo sections come out bit-unchanged (no splicing needed).
+    (Chosen over WORLD resynthesis, which cost 2.07 dB just to round-trip — more
+    damage than the 0.8 dB of shift it delivered.)"""
+    if abs(factor-1.0) < 1e-6:
+        return y
+    out = np.empty_like(y)
+    for c in range(y.shape[1]):
+        S = librosa.stft(y[:, c].astype(np.float64), n_fft=n_fft, hop_length=hop)
+        mag, ph = np.abs(S), np.angle(S)
+        logm = np.log(mag + 1e-8)
+        ceps = np.fft.rfft(logm, axis=0); ceps[lifter:] = 0
+        env = np.fft.irfft(ceps, n=logm.shape[0], axis=0)
+        nb = env.shape[0]; src = np.arange(nb)
+        gt = gate[np.clip(np.arange(env.shape[1])*hop, 0, len(gate)-1)]
+        fac_t = 1.0 + (factor-1.0)*gt                      # 1.0 in solos -> identity
+        warped = np.empty_like(env)
+        for t in range(env.shape[1]):
+            warped[:, t] = np.interp(src/fac_t[t], src, env[:, t])
+        g = np.clip(warped-env, -max_db*np.log(10)/20, max_db*np.log(10)/20)
+        out[:, c] = librosa.istft(mag*np.exp(g)*np.exp(1j*ph), hop_length=hop, length=len(y))
+    return out.astype(np.float32)
+
+def humanize(y, static_ms, seed, gate, walk_ms=12.0, walk_tc=1.0, lvl_db=1.2,
+             vib_hz=5.5, vib_ms=0.45):
     """Ensemble humanization for same-source unison voices.
 
     Three same-source voices with identical timing/F0 fuse into ONE perceived
@@ -138,7 +167,12 @@ def humanize(y, static_ms, seed, gate, walk_ms=12.0, walk_tc=1.0, lvl_db=1.2):
         w = np.interp(np.arange(n), np.arange(len(w))*blk, w)
         w = zsm(w, tc)
         return w / (np.max(np.abs(w)) + 1e-9)
-    d = (gate * (static_ms + walk_ms*walk(walk_tc))) * SR/1000.0     # delay, samples
+    # independent vibrato: the 3 males share ONE source vibrato, copied 3x — a strong
+    # fusion cue. A tiny sinusoidal delay gives each its own: pitch deviation =
+    # 2*pi*f*A, so 0.45ms @ 5.5Hz ~= +/-27 cents, a natural singer's vibrato depth.
+    t = np.arange(n)/SR
+    vib = vib_ms * np.sin(2*np.pi*vib_hz*t + rng.uniform(0, 2*np.pi))
+    d = (gate * (static_ms + walk_ms*walk(walk_tc) + vib)) * SR/1000.0   # delay, samples
     g = 10 ** ((gate * lvl_db * walk(3.0)) / 20.0)                   # own dynamics
     idx = np.arange(n) - d
     out = np.empty_like(y)
@@ -203,17 +237,27 @@ wpan = np.clip(zsm(nv - 1.0, 0.3), 0.0, 1.0)                      # 0 solo .. 1 
 male_gate = np.clip(zsm(acts["otoya-tsuka"] + acts["cecil-ai"] + acts["camus-toya"] - 1.0, 1.5), 0.0, 1.0)
 # all three get their OWN offset + walk (no "dry anchor" — an unmoved voice keeps
 # anchoring the ear to a single source). Spread ~22ms, peak delay <30ms.
-MALE_HUM = {"otoya-tsuka": (+10.0, 101), "cecil-ai": (-6.0, 303), "camus-toya": (+16.0, 202)}
-for v, (ms, seed) in MALE_HUM.items():
-    vp[v] = humanize(vp[v], ms, seed, male_gate)
+# per voice: (static offset ms, seed, vibrato Hz, formant factor = vocal-tract size)
+# (static offset ms, seed, vibrato Hz, formant factor = vocal-tract size).
+# DEFINITIVE per user A/B: a wider-spread v4 (0.91/1.09, vib 5.0-6.6Hz) was pushed
+# too far — the three read as different body types rather than three guys in one
+# group. Peak delay stays under ~30ms: past the fusion/precedence limit a late voice
+# reads as an echo and drags behind the beat, so timing is NOT the axis to push.
+MALE_HUM = {"otoya-tsuka": (+10.0, 101, 5.2, 0.94),     # larger tract -> bigger/darker
+            "cecil-ai":    ( -6.0, 303, 5.7, 1.00),     # reference size
+            "camus-toya":  (+16.0, 202, 6.1, 1.06)}     # smaller tract -> lighter
+for v, (ms, seed, vhz, ffac) in MALE_HUM.items():
+    vp[v] = humanize(vp[v], ms, seed, male_gate, vib_hz=vhz)
+    vp[v] = formant_shift(vp[v], ffac, male_gate)
 # NOTE: no makeup gain. Measured: the 3 male stems are already waveform-incoherent
 # (pairwise corr ~0.02 even raw — different models give different phase), so they
 # sum by power, and humanizing costs no level (sum RMS -24.9 dB before AND after).
 # The earlier +1.5/+2.0dB "compensation" was unjustified and made the 3-male section
 # louder than the 6-voice climax.
 print(f"  male humanize: gate active {100*np.mean(male_gate>0.5):.0f}% of time | "
-      f"offsets {{{', '.join(f'{k.split(chr(45))[0]}{v[0]:+.0f}ms' for k,v in MALE_HUM.items())}}} "
-      f"±12ms walk + ±1.2dB drift | no makeup (decorrelation is level-neutral)")
+      + " | ".join(f"{k.split('-')[0]}: {v[0]:+.0f}ms, vib {v[2]}Hz, formant {v[3]:.2f}"
+                   for k, v in MALE_HUM.items())
+      + " | ±12ms walk + ±1.2dB drift, no makeup")
 vbus = np.zeros((N, 2), np.float32)
 for v, y in vp.items():
     p = BASE_PAN[v] * wpan                                        # gated pan position
