@@ -77,8 +77,10 @@ def pitch_cols(lab, t0):
         note = f"参照异声" if abs(r["dev"] - oct_*1200) > 80 else f"低{abs(oct_)}八度" if oct_ < 0 else f"高{oct_}八度"
         return f"n/a ({note})", "—"
     dev = f"{r['dev']:+d} ct"
+    if r.get("veto"):
+        return dev, "耳测否决¹"
     sh = r.get("shift")
-    return dev, (f"**{sh:+d} ct**" if sh else "—")
+    return dev, (f"**{sh:+d} ct** 曲线" if sh else "—")
 BASE_PAN = {"honoka": -0.22, "kotori": 0.0, "umi": +0.22,
             "otoya-tsuka": -0.22, "cecil-ai": 0.0, "camus-toya": +0.22}
 files = glob.glob(D + "/*.wav")
@@ -138,8 +140,9 @@ rows.sort(key=lambda r: r["t0"])
 def fmt(t): return f"{int(t//60)}:{t%60:04.1f}"
 HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 cast 版)
 
-> 成品: **`tokyo-summer-session_lovelive-cover_v5.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
-> — 全部歌词补齐 (62 乐句) + 男声齐唱去相关 (时值/音高 + **共振峰微移 + 独立颤音**)
+> 成品: **`tokyo-summer-session_lovelive-cover_v8.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
+> — 62 乐句全齐 + 男声齐唱去相关 (时值/音高 + **共振峰微移 + 独立颤音**)
+> + 参照原唱的**时变曲线修音** (18 句, 含 1 句台词; 另 1 句台词修正被耳测否决¹)
 > 混音方法论: [METHODOLOGY §12](METHODOLOGY.md) · 参考实现: [tools/mix_full_cast.py](tools/mix_full_cast.py)
 > 机器可读版: [tools/line_table.csv](tools/line_table.csv)
 
@@ -187,7 +190,10 @@ HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 c
 | 列 | 含义 |
 |---|---|
 | **音准偏差** | 与**原唱同段**的音高差 (音分, +=偏高)。`n/a` = 该处原唱是**另一个声部/和声**, 无法比对 (原曲是二重唱); 括号里注明是低/高八度还是异音 |
-| **修音** | 实际施加的 PSOLA 移调量。只修"偏差 ≥25 音分**且**稳定"的句子, 其余**逐采样不动** |
+| **修音** | 实际施加的修正 (PSOLA **时变曲线**, 值 = 目标修正量)。只修"偏差 ≥25 音分**且**参照可信"的句子, 其余**逐采样不动** |
+
+> ¹ **耳测否决**: 0:55.9 海♂「これ飲めば？」偏 +100 音分, 修正在客观上成功 (+100→+20),
+> 但 A/B 耳测**原版更好** —— 念白式台词的语调偏差是表情, 不是走音。最终保留原样。
 | 原始电平 | 该句在对齐 stem 里的原始 RMS (dBFS) |
 | 静态增益 | 整轨均值 → 目标的固定增益 (女 +8~9 / 男 +17~18dB — 男声源本就轻约 9dB) |
 | 逐句增益 | 在静态之上, 该句为达到统一目标的额外增减 (逐句恒定, 只在句间过渡) |
