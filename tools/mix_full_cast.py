@@ -16,7 +16,7 @@ import pyloudnorm as pyln
 
 SR = 44100
 D = "/mnt/c/Users/kevin/Desktop/tokyo_summer_session_au/导出"
-OUT = "/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/tokyo_summer_session/tokyo-summer-session_cast_MIX_v3.wav"
+OUT = "/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/tokyo_summer_session/tokyo-summer-session_lovelive-cover_v5.wav"
 VOICES = ["honoka", "kotori", "umi", "otoya-tsuka", "cecil-ai", "camus-toya"]
 BASE_PAN = {"honoka": -0.22, "kotori": 0.0, "umi": +0.22,
             "otoya-tsuka": -0.22, "cecil-ai": 0.0, "camus-toya": +0.22}

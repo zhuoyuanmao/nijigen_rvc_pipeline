@@ -261,7 +261,7 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 | otoya_sho_mix | 男 | 候选 | 基线 baseline 中值谱 (`FINAL_otoya_v2.wav`), 被 otoya_tsukasa 取代 | [link](characters/otoya_sho_mix/KNOWHOW.md) |
 | camus / toya_camus±c2 / camus_toya10 | 男 | 实验 | §11 音色天花板实证 (toya≈camus 混不出区别; 纯 camus 命中天花板; 小语料微调档客观不稳) | [link](characters/camus/KNOWHOW.md) |
 
-> ⭐ **2026-08-05 全曲成品定稿**: `tokyo-summer-session_cast_MIX.wav` (227.9s, −12.2 LUFS,
+> ⭐ **2026-08-05 全曲成品定稿**: `tokyo-summer-session_lovelive-cover_v5.wav` (227.9s, −12.2 LUFS,
 > 真峰值 −1.0 dBTP) —— 6 音色逐句选角 (cast) 的完整翻唱, 人工 AU 逐乐句对齐 + 自动混音链
 > (**§12**), 逐句参数见 **§13**。早期各音色 24.5s 对齐样本一并保留在临时云盘。
 
@@ -345,7 +345,7 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 
 > 从 6 条整曲翻唱 (`{male,female}_full_covers/`) + off-vocal BGM 到**可发布成品**。
 > 分工: **人工负责创作决策** (逐句选角 casting + 逐乐句对齐), **脚本负责工程处理**
-> (电平/动态/空间/母带)。本曲成品: `tokyo-summer-session_cast_MIX.wav` (227.9s)。
+> (电平/动态/空间/母带)。本曲成品: `tokyo-summer-session_lovelive-cover_v5.wav` (227.9s)。
 
 ### 12.1 对齐: 人工 DAW, 不要自动 (负结果)
 
