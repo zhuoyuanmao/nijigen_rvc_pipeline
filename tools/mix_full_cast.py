@@ -16,7 +16,7 @@ import pyloudnorm as pyln
 
 SR = 44100
 D = "/mnt/c/Users/kevin/Desktop/tokyo_summer_session_au/导出"
-OUT = "/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/tokyo_summer_session/tokyo-summer-session_cast_MIX.wav"
+OUT = "/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/tokyo_summer_session/tokyo-summer-session_cast_MIX_v2.wav"
 VOICES = ["honoka", "kotori", "umi", "otoya-tsuka", "cecil-ai", "camus-toya"]
 BASE_PAN = {"honoka": -0.22, "kotori": 0.0, "umi": +0.22,
             "otoya-tsuka": -0.22, "cecil-ai": 0.0, "camus-toya": +0.22}
@@ -117,21 +117,33 @@ def activity(y, floor_rel=-38.0, smooth=0.15):
     thr = np.max(env) * 10**(floor_rel/20)
     return np.clip(zsm((env > thr).astype(np.float64), smooth), 0.0, 1.0)
 
-def humanize(y, static_ms, seed, gate, walk_ms=8.0, walk_tc=2.5):
-    """Ensemble humanization for same-source unison voices: slowly drifting
-    micro-delay (static offset + random walk). The slow delay modulation also
-    yields choir-like +/-10-15 cent pitch wander (chorus principle). `gate`
-    (0..1, slow) confines the effect to ensemble sections; solos stay put."""
+def humanize(y, static_ms, seed, gate, walk_ms=12.0, walk_tc=1.0, lvl_db=1.2):
+    """Ensemble humanization for same-source unison voices.
+
+    Three same-source voices with identical timing/F0 fuse into ONE perceived
+    singer no matter how different their timbres are — the ear groups sounds with
+    identical onsets. A choir instead has, per singer: (a) onset scatter and
+    (b) independent pitch wander. Both come from a drifting micro-delay:
+    static offset (three distinct values) + random walk. The walk's slope IS a
+    pitch deviation (d(delay)/dt): 12ms over ~1.0s ~= 1.2% ~= 20 cents, the
+    classic choir amount. Plus independent slow level drift (singers' own
+    dynamics). Max total delay stays < 30ms, the fusion/precedence limit —
+    beyond that it reads as a discrete echo instead of another singer.
+    `gate` (0..1, slow) confines all of it to ensemble sections; solos stay put.
+    """
     n = len(y)
     rng = np.random.RandomState(seed)
-    w = rng.randn(n//2048 + 2)
-    w = np.interp(np.arange(n), np.arange(len(w))*2048, w)
-    w = zsm(w, walk_tc); w = w / (np.max(np.abs(w)) + 1e-9)
-    d = (gate * (static_ms + walk_ms*w)) * SR/1000.0     # delay in samples
+    def walk(tc, blk=2048):
+        w = rng.randn(n//blk + 2)
+        w = np.interp(np.arange(n), np.arange(len(w))*blk, w)
+        w = zsm(w, tc)
+        return w / (np.max(np.abs(w)) + 1e-9)
+    d = (gate * (static_ms + walk_ms*walk(walk_tc))) * SR/1000.0     # delay, samples
+    g = 10 ** ((gate * lvl_db * walk(3.0)) / 20.0)                   # own dynamics
     idx = np.arange(n) - d
     out = np.empty_like(y)
     for c in range(y.shape[1]):
-        out[:, c] = np.interp(idx, np.arange(n), y[:, c])
+        out[:, c] = np.interp(idx, np.arange(n), y[:, c]) * g
     return out.astype(np.float32)
 
 def reverb_st(y, send=0.14, decay=0.9, predelay=0.015):
@@ -178,22 +190,30 @@ for v in VOICES:
 # ---------------- concurrency: unison law + gated panning ----------------
 acts = {v: activity(y) for v, y in vp.items()}
 nv = np.sum(list(acts.values()), axis=0)
-scale = (1.0 / np.maximum(nv, 1.0)**0.5).astype(np.float32)       # approved 1/sqrt(N)
+# Unison law 1/N^P. P=0.85 was too tame ("不够气势"); 0.5 = equal-power baseline;
+# 0.42 leans fuller so the 6-voice finale is the loudest point of the song. Applied
+# to ALL voices — a musical choice, not a male-only fudge.
+P = 0.42
+scale = (1.0 / np.maximum(nv, 1.0)**P).astype(np.float32)
 wpan = np.clip(zsm(nv - 1.0, 0.3), 0.0, 1.0)                      # 0 solo .. 1 ensemble
 
 # male ensemble humanization: the 3 males share ONE source performance (identical
 # timing/F0) -> unison reads as one person. Gate on >=2 males singing; cecil (C)
 # stays as the dry anchor; otoya/camus get drifting micro-timing.
 male_gate = np.clip(zsm(acts["otoya-tsuka"] + acts["cecil-ai"] + acts["camus-toya"] - 1.0, 1.5), 0.0, 1.0)
-vp["otoya-tsuka"] = humanize(vp["otoya-tsuka"], +11.0, 101, male_gate)
-vp["camus-toya"]  = humanize(vp["camus-toya"], -13.0, 202, male_gate)
-# decorrelation trades coherent-sum level for ensemble realism (~-1.2dB measured);
-# gate-linked makeup restores the ensemble's fullness without touching solos
-mk = (10**((1.5*male_gate)/20)).astype(np.float32)[:, None]
-for v in ("otoya-tsuka", "cecil-ai", "camus-toya"):
-    vp[v] = (vp[v] * mk).astype(np.float32)
-print(f"  male humanize: gate active {100*np.mean(male_gate>0.5):.0f}% of time "
-      f"(otoya +11ms/±8ms walk, camus -13ms/±8ms walk, cecil anchor, +1.5dB gated makeup)")
+# all three get their OWN offset + walk (no "dry anchor" — an unmoved voice keeps
+# anchoring the ear to a single source). Spread ~22ms, peak delay <30ms.
+MALE_HUM = {"otoya-tsuka": (+10.0, 101), "cecil-ai": (-6.0, 303), "camus-toya": (+16.0, 202)}
+for v, (ms, seed) in MALE_HUM.items():
+    vp[v] = humanize(vp[v], ms, seed, male_gate)
+# NOTE: no makeup gain. Measured: the 3 male stems are already waveform-incoherent
+# (pairwise corr ~0.02 even raw — different models give different phase), so they
+# sum by power, and humanizing costs no level (sum RMS -24.9 dB before AND after).
+# The earlier +1.5/+2.0dB "compensation" was unjustified and made the 3-male section
+# louder than the 6-voice climax.
+print(f"  male humanize: gate active {100*np.mean(male_gate>0.5):.0f}% of time | "
+      f"offsets {{{', '.join(f'{k.split(chr(45))[0]}{v[0]:+.0f}ms' for k,v in MALE_HUM.items())}}} "
+      f"±12ms walk + ±1.2dB drift | no makeup (decorrelation is level-neutral)")
 vbus = np.zeros((N, 2), np.float32)
 for v, y in vp.items():
     p = BASE_PAN[v] * wpan                                        # gated pan position
