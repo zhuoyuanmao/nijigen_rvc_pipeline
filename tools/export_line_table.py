@@ -130,9 +130,13 @@ wpan = np.clip(zsm(nv-1.0, 0.3), 0, 1)
 rows=[]
 for v in VOICES:
     for s,e,l,pg in phr[v]:
-        n_mid = float(np.mean(nv[s:e])); pan = BASE_PAN[v]*float(np.mean(wpan[s:e]))
+        n_mid = float(np.mean(nv[s:e]))
+        # pan is TIME-VARYING (concurrency-gated): report start -> peak, not the
+        # misleading phrase average (a solo-into-duet line averaged "C then R20" to R12)
+        p_start = BASE_PAN[v]*float(np.mean(wpan[s:min(e, s+int(0.3*SR))]))
+        p_peak  = BASE_PAN[v]*float(np.max(wpan[s:e]))
         rows.append(dict(t0=s/SR, t1=e/SR, voice=LABEL[v], raw=l, sg=sg[v], pg=pg,
-                         net=sg[v]+pg, n=n_mid, pan=pan,
+                         net=sg[v]+pg, n=n_mid, pan_s=p_start, pan_p=p_peak,
                          scale=20*np.log10(1/max(n_mid,1.0)**0.5),
                          hum=float(np.mean(male_gate[s:e]))))
 rows.sort(key=lambda r: r["t0"])
@@ -199,7 +203,7 @@ HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 c
 | 逐句增益 | 在静态之上, 该句为达到统一目标的额外增减 (逐句恒定, 只在句间过渡) |
 | **净增益** | 静态 + 逐句 = 该句实际被抬升的总量 |
 | 同唱人数 | 该句时间窗内的平均并发音色数 (1=独唱, 3=男声齐唱, 6=全员) |
-| 声像 | C=正中 / L·R+数值 = 左右偏移百分比 (仅齐唱段展开, 独唱保持正中) |
+| 声像 | **起点→峰值** (随时间变化): `C→R20` = 句子从正中开始, 伙伴加入后滑到右 20% 组位; 单值 = 整句不变。独唱段始终正中 |
 | 齐唱缩放 | 1/√N 齐唱定律施加的衰减 (防多人叠加过响) |
 | 合唱去相关 | 男声人性化微时移是否生效 (3 男同源, 齐唱时需去相关才像多人) |
 
@@ -211,9 +215,12 @@ HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 c
 md = ["| # | 时间 | 时长 | 组 | 演唱 | 歌词 | 音准偏差 | 修音 | 原始 | 静态 | 逐句 | 净增益 | 同唱 | 声像 | 齐唱缩放 | 去相关 |",
       "|---:|---|---:|:-:|:-:|---|---:|---:|---:|---:|---:|---:|---:|:-:|---:|:-:|"]
 csv = ["idx,start_s,end_s,dur_s,group,singer,lyric,voice,pitch_dev_ct,pitch_shift_ct,raw_dbfs,"
-       "static_gain_db,phrase_gain_db,net_gain_db,concurrent_voices,pan,unison_scale_db,humanize"]
+       "static_gain_db,phrase_gain_db,net_gain_db,concurrent_voices,pan_start,pan_peak,unison_scale_db,humanize"]
+def pfmt(p):
+    return "C" if abs(p) < 0.03 else (("L" if p < 0 else "R") + f"{abs(p)*100:.0f}")
 for i,r in enumerate(rows,1):
-    pan = "C" if abs(r["pan"])<0.02 else (f"L{abs(r['pan'])*100:.0f}" if r["pan"]<0 else f"R{r['pan']*100:.0f}")
+    a, b = pfmt(r["pan_s"]), pfmt(r["pan_p"])
+    pan = a if a == b else f"{a}→{b}"
     ly = lyric(r["voice"], r["t0"]); g = GRP[r["voice"]]; s = SNG[r["voice"]]
     dev, sh = pitch_cols(r["voice"], r["t0"])
     pr = pitch_of(r["voice"], r["t0"])
@@ -222,7 +229,7 @@ for i,r in enumerate(rows,1):
               f"{r['scale']:+.1f} | {'是' if r['hum']>0.5 else '—'} |")
     csv.append(f"{i},{r['t0']:.2f},{r['t1']:.2f},{r['t1']-r['t0']:.2f},{g},{s},\"{ly}\",{r['voice']},"
                f"{pr.get('dev','')},{pr.get('shift','')},{r['raw']:.1f},"
-               f"{r['sg']:.1f},{r['pg']:.1f},{r['net']:.1f},{r['n']:.2f},{r['pan']:.2f},{r['scale']:.1f},{r['hum']:.2f}")
+               f"{r['sg']:.1f},{r['pg']:.1f},{r['net']:.1f},{r['n']:.2f},{r['pan_s']:.2f},{r['pan_p']:.2f},{r['scale']:.1f},{r['hum']:.2f}")
 R="/mnt/c/Users/kevin/ai_sing_by_ai/nijigen_rvc_pipeline/"
 open(R+"MIX_TABLE.md","w",encoding="utf-8").write(HEAD + "\n".join(md) + "\n")
 open(R+"tools/line_table.csv","w",encoding="utf-8").write("\n".join(csv) + "\n")
