@@ -204,7 +204,7 @@ def vstd(y):   # std of per-phrase mean level (dB), breath-robust: drop segs >10
     return float(np.std(lv)) if len(lv)>1 else 0.0
 
 # ---------------- per-voice chain ----------------
-bgm_r = arms(bgm.mean(1)); target = bgm_r * 10**(5/20)          # vocals +5 dB over BGM (approved)
+bgm_r = arms(bgm.mean(1)); target = bgm_r * 10**(4/20)          # vocals +4 dB over BGM (v10: was +5, user found vocals a touch hot)
 target_db = 20*np.log10(target)
 print(f"BGM active RMS {20*np.log10(bgm_r):.1f} dBFS -> vocal target {target_db:.1f} dBFS")
 vp = {}
@@ -276,8 +276,8 @@ vbus = reverb_st(vbus, send=0.10)   # drier: pull the vocal forward (less "karao
 
 # ---------------- BGM duck + master ----------------
 act_any = np.clip(zsm(np.clip(nv, 0, 1), 0.25), 0, 1)
-bgm_d = (bgm * (10**(-1.2*act_any/20))[:, None]).astype(np.float32)
-print(f"  BGM duck: -1.2 dB x activity (engaged {100*np.mean(act_any>0.5):.0f}% of time)")
+bgm_d = (bgm * (10**(-0.8*act_any/20))[:, None]).astype(np.float32)   # v10: was -1.2 (BGM felt weak)
+print(f"  BGM duck: -0.8 dB x activity (engaged {100*np.mean(act_any>0.5):.0f}% of time)")
 mix = bgm_d + vbus
 meter = pyln.Meter(SR)
 mix = (mix * 10**((-12.0 - meter.integrated_loudness(mix))/20)).astype(np.float32)

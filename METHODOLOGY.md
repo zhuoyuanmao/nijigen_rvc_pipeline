@@ -261,7 +261,7 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 | otoya_sho_mix | 男 | 候选 | 基线 baseline 中值谱 (`FINAL_otoya_v2.wav`), 被 otoya_tsukasa 取代 | [link](characters/otoya_sho_mix/KNOWHOW.md) |
 | camus / toya_camus±c2 / camus_toya10 | 男 | 实验 | §11 音色天花板实证 (toya≈camus 混不出区别; 纯 camus 命中天花板; 小语料微调档客观不稳) | [link](characters/camus/KNOWHOW.md) |
 
-> ⭐ **2026-08-07 全曲成品定稿**: `tokyo-summer-session_lovelive-cover_v9.wav` (227.9s / 62 乐句,
+> ⭐ **2026-08-07 全曲成品定稿**: `tokyo-summer-session_lovelive-cover_v10.wav` (227.9s / 62 乐句,
 > −12.2 LUFS, 真峰值 −1.0 dBTP) —— 6 音色逐句选角 (cast) 的完整翻唱: 人工 AU 逐乐句对齐
 > + 自动混音链 (**§12**) + 参照原唱的外科式修音 (**§12.5**, 17/62 句)。逐句参数见 **§13**。
 > 早期各音色 24.5s 对齐样本一并保留在临时云盘。
@@ -361,7 +361,7 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
 
 > 从 6 条整曲翻唱 (`{male,female}_full_covers/`) + off-vocal BGM 到**可发布成品**。
 > 分工: **人工负责创作决策** (逐句选角 casting + 逐乐句对齐), **脚本负责工程处理**
-> (电平/动态/空间/母带)。本曲成品: `tokyo-summer-session_lovelive-cover_v9.wav` (227.9s)。
+> (电平/动态/空间/母带)。本曲成品: `tokyo-summer-session_lovelive-cover_v10.wav` (227.9s)。
 
 ### 12.1 对齐: 人工 DAW, 不要自动 (负结果)
 
@@ -388,12 +388,12 @@ LPF+tame 修复链、逐段选 ckpt。若 v2 仍出**梳齿/呼吸幻觉**, 先�
         → de-ess → 轻胶合压缩 → 逐声部前瞻限幅 (−1dBFS)
 合唱处理: 男声人性化去相关 (仅合唱段: 时值/颤音/共振峰) → 并发门控声像 → 1/N^P 齐唱定律
 总线:   低搁架(180,+1.5) + 临场(3.8k,+1.5) + 胶合压缩 → 真立体声混响 (send 0.10)
-BGM:    人声活动联动闪避 (−1.2dB)
+BGM:    人声活动联动闪避 (−0.8dB; v10 从 −1.2 放松)
 母带:   LUFS −12 → 限幅 → 4× 过采样真峰值 ≤ −1.0 dBTP
 ```
 > 修音在**混音之前**做 (改的是分轨), 所以混音链完全不用改; 详见 §12.5。
 
-**目标电平**: 人声 = BGM 有声段 RMS **+5dB** (本曲 BGM −16.9 → 目标 −11.9 dBFS)。
+**目标电平**: 人声 = BGM 有声段 RMS **+4dB** (本曲 BGM −16.9 → 目标 −12.9 dBFS; v10 从 +5 收 1dB, 用户听感"人声有些响")。
 
 ### 12.3 五个关键设计 (都来自实测/耳测迭代)
 
@@ -462,7 +462,7 @@ BGM:    人声活动联动闪避 (−1.2dB)
 - 验收: 逐句电平 std ≤1.3dB · 合唱 vs 独唱 delta ≈ +0.5~1dB · 零削波 ·
   人声段整体高于纯 BGM 段。
 
-> **可调旋钮 (供后续口味微调)**: 人声/BGM 比 (+5dB) · 齐唱 P (0.5) · 混响 send (0.10) ·
+> **可调旋钮 (供后续口味微调)**: 人声/BGM 比 (+4dB) · 齐唱 P (0.5) · 混响 send (0.10) ·
 > 声像宽度 (±0.22) · 去相关量 (±11-13ms) · LUFS (−12)。
 
 ---
