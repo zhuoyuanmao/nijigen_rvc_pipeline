@@ -204,7 +204,12 @@ def vstd(y):   # std of per-phrase mean level (dB), breath-robust: drop segs >10
     return float(np.std(lv)) if len(lv)>1 else 0.0
 
 # ---------------- per-voice chain ----------------
-bgm_r = arms(bgm.mean(1)); target = bgm_r * 10**(4/20)          # vocals +4 dB over BGM (v10: was +5, user found vocals a touch hot)
+# v11: target CALIBRATED TO THE ORIGINAL SONG, not set by taste. Measured the
+# original's mix-domain balance (vocal sections vs instrumental-only sections =
+# +3.1 dB) and solved the stem target that reproduces it here: -5.0 dB. Verified
+# on output: ours +3.2 vs original +3.1. (Earlier +5/+4 guesses ran vocals ~8 dB
+# hotter than the original master does.)
+bgm_r = arms(bgm.mean(1)); target = bgm_r * 10**(-5.0/20)
 target_db = 20*np.log10(target)
 print(f"BGM active RMS {20*np.log10(bgm_r):.1f} dBFS -> vocal target {target_db:.1f} dBFS")
 vp = {}
