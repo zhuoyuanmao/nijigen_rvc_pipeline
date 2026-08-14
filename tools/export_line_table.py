@@ -80,7 +80,8 @@ def pitch_cols(lab, t0):
     if r.get("veto"):
         return dev, "耳测否决¹"
     sh = r.get("shift")
-    return dev, (f"**{sh:+d} ct** 曲线" if sh else "—")
+    if not sh: return dev, "—"
+    return dev, f"**{sh:+d} ct** {'耳测²' if r.get('method') == 'ear' else '曲线'}"
 BASE_PAN = {"honoka": -0.22, "kotori": 0.0, "umi": +0.22,
             "otoya-tsuka": -0.22, "cecil-ai": 0.0, "camus-toya": +0.22}
 files = glob.glob(D + "/*.wav")
@@ -144,7 +145,7 @@ rows.sort(key=lambda r: r["t0"])
 def fmt(t): return f"{int(t//60)}:{t%60:04.1f}"
 HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 cast 版)
 
-> 成品: **`tokyo-summer-session_lovelive-cover_v12.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
+> 成品: **`tokyo-summer-session_lovelive-cover_v13.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
 > — 62 乐句全齐 + 男声齐唱去相关 (时值/音高 + **共振峰微移 + 独立颤音**)
 > + 参照原唱的**时变曲线修音** (18 句, 含 1 句台词; 另 1 句台词修正被耳测否决¹)
 > 混音方法论: [METHODOLOGY §12](METHODOLOGY.md) · 参考实现: [tools/mix_full_cast.py](tools/mix_full_cast.py)
@@ -198,6 +199,11 @@ HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 c
 
 > ¹ **耳测否决**: 0:55.9 海♂「これ飲めば？」偏 +100 音分, 修正在客观上成功 (+100→+20),
 > 但 A/B 耳测**原版更好** —— 念白式台词的语调偏差是表情, 不是走音。最终保留原样。
+>
+> ² **耳测选定 (非参照值)**: 2:30.8 海♂「綺麗だね」实测偏 −30 音分, 但修到与原唱一致
+> (+30) 听感反而奇怪。四档 A/B (−30 / 0 / +30 / +60) 后**选定 +60** —— 即比原唱高
+> 30 音分。这句是与紧接其后的女声「綺麗だね」的对唱呼应, 耳朵要的是这个音程关系,
+> 不是与原唱的绝对一致。**参照值是起点, 不是答案。**
 | 原始电平 | 该句在对齐 stem 里的原始 RMS (dBFS) |
 | 静态增益 | 整轨均值 → 目标的固定增益 (女 +8~9 / 男 +17~18dB — 男声源本就轻约 9dB) |
 | 逐句增益 | 在静态之上, 该句为达到统一目标的额外增减 (逐句恒定, 只在句间过渡) |
