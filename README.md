@@ -63,12 +63,13 @@ nijigen_rvc_pipeline/
 
 ### 🎵 全曲成品 (2026-08-07 定稿)
 
-**`tokyo-summer-session_lovelive-cover_v13.wav`** — 227.9s / 62 乐句，6 音色**逐句选角 (cast)** 的
+**`tokyo-summer-session_lovelive-cover_v14.wav`** — 227.9s / 62 乐句，6 音色**逐句选角 (cast)** 的
 完整翻唱（−12.2 LUFS / 真峰值 −1.0 dBTP）。
 
 工作流：人工在 Audition 里**逐乐句对齐 + casting** → 脚本做**自动混音链**
 （逐句调平 → 去齿音 → **男声齐唱去相关** → 并发声像 → 齐唱定律 → 真立体声混响
-→ BGM 避让 → 真峰值母带）→ **参照原唱的外科式修音**（17/62 句）。
+→ BGM 避让 → 真峰值母带）→ **外科式修音**（18/62 句：16 句按原唱参照自动修，
+2 句 A/B 耳测定值 —— 其中 1 句参照根本不可用，靠**曲内平行段自洽**查出）。
 
 - **逐句参数表（每句谁唱 + 各维度处理值 + 音准/修音）：[MIX_TABLE.md](MIX_TABLE.md)** ← 想给人看/收 feedback 看这个
 - 混音方法论：[METHODOLOGY §12](METHODOLOGY.md)　·　修音：[§12.5](METHODOLOGY.md)
