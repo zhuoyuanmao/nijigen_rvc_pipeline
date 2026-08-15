@@ -81,6 +81,10 @@ def pitch_cols(lab, t0):
     dev = f"{r['dev']:+d} ct"
     if r.get("veto"):
         return dev, "耳测否决¹"
+    if r.get("frozen"):
+        # measurable and out of tune on its own, but it is the other half of an
+        # ear-approved interval — correcting it would undo what the A/B decided
+        return dev, "冻结³"
     sh = r.get("shift")
     if not sh: return dev, "—"
     return dev, f"**{sh:+d} ct** {'耳测²' if r.get('method') == 'ear' else '曲线'}"
@@ -147,9 +151,11 @@ rows.sort(key=lambda r: r["t0"])
 def fmt(t): return f"{int(t//60)}:{t%60:04.1f}"
 HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 cast 版)
 
-> 成品: **`tokyo-summer-session_lovelive-cover_v14.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
+> 成品: **`tokyo-summer-session_lovelive-cover_v16.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
+> 修音参照: **六声优版**原唱 (v16 起; 逐句选角与本 cast 对应, 参照可用性大幅提升); v15 及以前为二人版。
 > — 62 乐句全齐 + 男声齐唱去相关 (时值/音高 + **共振峰微移 + 独立颤音**)
-> + 参照原唱的**时变曲线修音** (18 句, 含 1 句台词; 另 1 句台词修正被耳测否决¹)
+> + 参照原唱的**时变曲线修音** 19 句 (含 1 句台词) + **耳测定值** 2 句²
+> — 另 1 句台词修正被耳测否决¹, 1 句为耳测搭档而冻结³
 > 混音方法论: [METHODOLOGY §12](METHODOLOGY.md) · 参考实现: [tools/mix_full_cast.py](tools/mix_full_cast.py)
 > 机器可读版: [tools/line_table.csv](tools/line_table.csv)
 
@@ -212,6 +218,13 @@ HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 c
 >   与他自己 Ah 同音。**判据不是原唱, 是曲内平行段的自洽。**
 >
 > **参照值是起点, 不是答案。**
+>
+> ³ **为耳测搭档而冻结**: 耳测锁定的是**两句之间的音程**, 不是单句的绝对音高。
+> 0:13.9 鸟♀ 自己测出偏 **+60 音分**、看似该修, 但她正是 0:15.0 那次 A/B 的**另一半** ——
+> 当时用户听的就是"鸟♀ 原样 + 鸟♂ −60"这个组合。单独把她修下去, 组合又从大三度塌回
+> 小三度, **用户拍板过的听感会被静默拆掉**。这句要动, 只能带着已锁的半边**重新 A/B 整个组合**。
+> (2:31.9 海♀「綺麗だね」同样在保护清单里, 只是它的参照本就不可比、已标 `n/a`,
+>  冻结对它是冗余的一道保险。)
 | 原始电平 | 该句在对齐 stem 里的原始 RMS (dBFS) |
 | 静态增益 | 整轨均值 → 目标的固定增益 (女 +8~9 / 男 +17~18dB — 男声源本就轻约 9dB) |
 | 逐句增益 | 在静态之上, 该句为达到统一目标的额外增减 (逐句恒定, 只在句间过渡) |
