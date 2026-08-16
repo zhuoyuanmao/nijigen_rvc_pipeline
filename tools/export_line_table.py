@@ -156,7 +156,7 @@ rows.sort(key=lambda r: r["t0"])
 def fmt(t): return f"{int(t//60)}:{t%60:04.1f}"
 HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 cast 版)
 
-> 成品: **`tokyo-summer-session_lovelive-cover_v17.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
+> 成品: **`tokyo-summer-session_lovelive-cover_v18.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
 > 修音参照: **六声优版**原唱 (v16 起; 逐句选角与本 cast 对应, 参照可用性大幅提升); v15 及以前为二人版。
 > — 62 乐句全齐 + 男声齐唱去相关 (时值/音高 + **共振峰微移 + 独立颤音**)
 > + 参照原唱的**时变曲线修音** 19 句 (含 1 句台词) + **耳测定值** 2 句² + **逐音等律** 1 句⁴

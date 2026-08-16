@@ -1,4 +1,4 @@
-"""Did the -9.0 dB target actually land v17 on the 6-seiyuu original's balance?
+"""Did the -9.0 dB target actually land v18 on the 6-seiyuu original's balance?
 
 Same measurement that found the 4.1 dB error: vocal bus vs BGM bus for ours (exact,
 they are kept separate until the sum), LS-rescaled complementary stems for the
@@ -26,10 +26,10 @@ meter = pyln.Meter(SR)
 rows = []
 for lab, mixp, vp, bp in [
         ("六声优版原曲", REFMIX, None, None),
-        ("v16 (旧配平)", J+"tokyo-summer-session_lovelive-cover_v16.wav",
+        ("v17 (上一版)", J+"tokyo-summer-session_lovelive-cover_v16.wav",
          SP+"/bus_vocal.wav", SP+"/bus_bgm.wav"),
-        ("v17 (新配平)", J+"tokyo-summer-session_lovelive-cover_v17.wav",
-         SP+"/bus17_vocal.wav", SP+"/bus17_bgm.wav")]:
+        ("v18 (新配平)", J+"tokyo-summer-session_lovelive-cover_v18.wav",
+         SP+"/bus18_vocal.wav", SP+"/bus18_bgm.wav")]:
     if vp is None:
         voc, ins, mix = rv, ri, rm
     else:
@@ -54,5 +54,5 @@ for lab, lv, li, d, lufs in rows[1:]:
     gap = d - ref_d
     print(f"\n{lab} 对原曲: {gap:+.1f} dB "
           f"{'✔ 相符 (<=0.5dB)' if abs(gap) <= 0.5 else '← 仍需调整'}")
-    if abs(gap) > 0.5 and "v17" in lab:
+    if abs(gap) > 0.5 and "v18" in lab:
         print(f"   建议把人声目标从 -9.0 再改为 {-9.0 - gap:+.1f} dB")

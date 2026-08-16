@@ -6,7 +6,7 @@ TUN=/mnt/c/Users/kevin/Desktop/tokyo_summer_session_au/导出_tuned2
 J=/mnt/c/Users/kevin/ai_sing_by_ai/ja_tts_explore/tokyo_summer_session
 D=/mnt/c/Users/kevin/Desktop/tokyo_summer_session_au
 F=/mnt/c/Users/kevin/ai_sing_by_ai/nijigen_rvc_pipeline/MIX_TABLE.md
-V=v17
+V=v18
 
 echo "########## 1. 对新导出重跑诊断 (参照: 六声优版) ##########"
 $PY -u "$SP/pitch_diag_v16.py" > /tmp/diag_v17.log 2>&1
@@ -46,8 +46,8 @@ import sys, pathlib
 sp, v = pathlib.Path(sys.argv[1]), sys.argv[2]
 s = (sp/f"mix_{v}.py").read_text(encoding="utf-8")
 add = ('import soundfile as _sf\n'
-       '_sf.write("%s/bus17_vocal.wav", vbus, SR, subtype="FLOAT")\n'
-       '_sf.write("%s/bus17_bgm.wav", bgm_d, SR, subtype="FLOAT")\n' % (sp, sp))
+       '_sf.write("%s/bus18_vocal.wav", vbus, SR, subtype="FLOAT")\n'
+       '_sf.write("%s/bus18_bgm.wav", bgm_d, SR, subtype="FLOAT")\n' % (sp, sp))
 s = s.replace("mix = bgm_d + vbus", add + "mix = bgm_d + vbus", 1)
 (sp/f"mix_{v}.py").write_text(s, encoding="utf-8")
 EOF
