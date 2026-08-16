@@ -72,6 +72,11 @@ def pitch_cols(lab, t0):
     if not r or "dev" not in r:
         return "—", "—"
     sh_ = r.get("shift")
+    if r.get("method") == "grid":
+        # per-note snap to equal temperament; a single mean number would be meaningless
+        oct_ = round(r["dev"]/1200)
+        lab = (f"n/a (参照异声)" if not r.get("usable", True) else f"{r['dev']:+d} ct")
+        return lab, f"**逐音 {r.get('notes','?')} 音**⁴"
     if not r.get("usable", True):
         # reference held the other duet voice / a harmony there. An ear-set shift can
         # still exist here (decided on the internal harmony, not on the reference).
@@ -151,11 +156,12 @@ rows.sort(key=lambda r: r["t0"])
 def fmt(t): return f"{int(t//60)}:{t%60:04.1f}"
 HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 cast 版)
 
-> 成品: **`tokyo-summer-session_lovelive-cover_v16.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
+> 成品: **`tokyo-summer-session_lovelive-cover_v17.wav`** (227.9s · −12.2 LUFS · 真峰值 −1.0 dBTP)
 > 修音参照: **六声优版**原唱 (v16 起; 逐句选角与本 cast 对应, 参照可用性大幅提升); v15 及以前为二人版。
 > — 62 乐句全齐 + 男声齐唱去相关 (时值/音高 + **共振峰微移 + 独立颤音**)
-> + 参照原唱的**时变曲线修音** 19 句 (含 1 句台词) + **耳测定值** 2 句²
+> + 参照原唱的**时变曲线修音** 19 句 (含 1 句台词) + **耳测定值** 2 句² + **逐音等律** 1 句⁴
 > — 另 1 句台词修正被耳测否决¹, 1 句为耳测搭档而冻结³
+> 人声/伴奏平衡: **按六声优版原曲实测配平** (原曲 −5.2 dB, 本版 −5.1 dB)
 > 混音方法论: [METHODOLOGY §12](METHODOLOGY.md) · 参考实现: [tools/mix_full_cast.py](tools/mix_full_cast.py)
 > 机器可读版: [tools/line_table.csv](tools/line_table.csv)
 
@@ -225,6 +231,13 @@ HEAD = """# 逐句混音参数表 — 東京サマーセッション (6 音色 c
 > 小三度, **用户拍板过的听感会被静默拆掉**。这句要动, 只能带着已锁的半边**重新 A/B 整个组合**。
 > (2:31.9 海♀「綺麗だね」同样在保护清单里, 只是它的参照本就不可比、已标 `n/a`,
 >  冻结对它是冗余的一道保险。)
+>
+> ⁴ **逐音等律修正 (无参照可用时)**: 2:48.8 海♂「時を止め帰りたくないよね、今日は」用户耳测
+> 偏音。这句参照完全不可比 (原始偏差 +1870 音分, 八度折叠后也只有 11% 的帧落在 60 音分内 ——
+> 六声优版此处是另一条旋律), 所以基准换成**等律半音格**。11 个音里 6 个偏 ≥20 音分
+> (范围 −43…+37), 逐音平移到最近半音, **强度 85%** (留 15% 自然浮动, 不做成机器音)。
+> 只处理偏差 ≤50 音分的音, 保证"最近半音"没有歧义; 每个音整体平移而非压平轮廓,
+> 颤音/滑音/起音都保留。结果: 离半音格的中位偏差 **27 → 17 音分**。
 | 原始电平 | 该句在对齐 stem 里的原始 RMS (dBFS) |
 | 静态增益 | 整轨均值 → 目标的固定增益 (女 +8~9 / 男 +17~18dB — 男声源本就轻约 9dB) |
 | 逐句增益 | 在静态之上, 该句为达到统一目标的额外增减 (逐句恒定, 只在句间过渡) |

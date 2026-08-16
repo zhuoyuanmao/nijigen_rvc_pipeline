@@ -29,7 +29,8 @@ PROTECT = {"kotori-male": [(14.5, 17.9)],            # 合 Uh — ear -60 (appli
            "umi":         [(150.5, 154.5)],          # 「綺麗だね」女声半边 — 同上
            "umi-male":    [(55.0, 58.0),             # 「これ飲めば？」 — ear-vetoed, stays raw
                            (129.0, 134.0),           # 「手作りクッキー？」 — A/B-approved old curve
-                           (150.3, 152.4)]}          # 「綺麗だね」 — ear +60 (applied after)
+                           (150.3, 152.4),           # 「綺麗だね」 — ear +60 (applied after)
+                           (168.3, 175.2)]}          # 時を止め… — 参照在此为异声部, 走等律逐音修正
 os.makedirs(OUT, exist_ok=True)
 
 def psola_curve(x, corr_t, corr_c, fmin, fmax):

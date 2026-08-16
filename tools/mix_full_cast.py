@@ -204,12 +204,15 @@ def vstd(y):   # std of per-phrase mean level (dB), breath-robust: drop segs >10
     return float(np.std(lv)) if len(lv)>1 else 0.0
 
 # ---------------- per-voice chain ----------------
-# v11: target CALIBRATED TO THE ORIGINAL SONG, not set by taste. Measured the
-# original's mix-domain balance (vocal sections vs instrumental-only sections =
-# +3.1 dB) and solved the stem target that reproduces it here: -5.0 dB. Verified
-# on output: ours +3.2 vs original +3.1. (Earlier +5/+4 guesses ran vocals ~8 dB
-# hotter than the original master does.)
-bgm_r = arms(bgm.mean(1)); target = bgm_r * 10**(-5.0/20)
+# v17: target calibrated by DIRECT stem-domain measurement against the 6-seiyuu
+# original — vocal bus vs BGM bus, both loudness-aligned. Measured there -5.2 dB,
+# ours was -1.1 dB, so the vocal target drops 4.0 dB: -5.0 -> -9.0.
+#
+# v11's -5.0 came from a weaker proxy (vocal sections minus instrumental-only
+# sections inside the master). That metric moves only ~1.3 dB for a 4 dB change in
+# the actual vocal:BGM ratio — the mix sums in power — so it read "+3.2 vs +3.1,
+# MATCH" while the balance was in fact 4 dB vocal-hot. Do not calibrate on it.
+bgm_r = arms(bgm.mean(1)); target = bgm_r * 10**(-9.0/20)
 target_db = 20*np.log10(target)
 print(f"BGM active RMS {20*np.log10(bgm_r):.1f} dBFS -> vocal target {target_db:.1f} dBFS")
 vp = {}
