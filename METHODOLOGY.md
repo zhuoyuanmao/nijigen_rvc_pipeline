@@ -166,6 +166,17 @@ python train.py -se 20 -te 200 -bs 16 -sr 40k -f0 1 -l 0 -sw 0 \
 - **存储策略**: 训练产物全留 ext4 (`~/rvc_data/<exp>/`, 800G+ 空闲);
   C: 盘 (紧张) 只在部署时收小的 `*_infer.pth`。v1 把 D+full-G 全拷 C:
   浪费 16.9GB/音色。
+
+  > ⚠️ **清理 ext4 时务必保留 `logs/<exp>/filelist.txt`** —— 推理脚本要读它算
+  > steps-per-epoch (`spe = ceil(行数/16)`) 来筛 e100-200 的 ckpt。删掉会直接
+  > `FileNotFoundError` (honoka 已中过一次)。行数备份 (2026-08-17 实测):
+  > `honoka_v2 2946 · kotori_v2 2963 · umi_v2 2945 · otoya_tsukasa_mix_v2 2086 ·
+  > cecil_ai_mix_v2 1534 · camus_toya20_v2 714`。
+  >
+  > 音色定稿后, ext4 里可安全清掉的: `logs/D_*.pth` (判别器, 只用于续训,
+  > 推理永不加载, 约占该实验一半体积) · `logs/G_*.pth` (部署用的 `_infer.pth`
+  > 已在 C:) · `logs/{0_gt_wavs,1_16k_wavs,2a_f0,2b-f0nsf,3_feature768}` (可从语料
+  > 重生成) · `dataset_raw` (C: 的 `characters/*/data` 有副本)。本曲 5 个实验共 97GB → 60MB。
 - 时长: 300ep ~5h (数据在 ext4)。200ep ~3-4h。
 - 监控: `tools/watch_log.sh` (清洗 tqdm CR 乱码); loss 看 `loss_mel`
   (对应频谱重建质量, 是电流声的直接指标)。
